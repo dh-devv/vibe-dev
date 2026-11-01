@@ -23,7 +23,6 @@
 
 ### Frontend
 - HTML / CSS / JavaScript
-- 미정
 
 ### Backend
 - Spring Boot
