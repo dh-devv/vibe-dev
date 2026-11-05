@@ -144,6 +144,9 @@ volumes:
 | `GLOBAL_PER_DAY` | 아니오 | 전체 일일 한도, 기본값 `300` |
 | `MODEL_TIMEOUT_SECONDS` | 아니오 | 기본값 `30` |
 | `TRIAL_TIMEOUT_SECONDS` | 아니오 | 기본값 `90` |
+| `COPILOT_MODEL` | 아니오 | 비우면 Copilot 기본 모델 |
+| `DEV_AUTH_ENABLED` | 아니오 | `true`면 로컬 개발용 소유자로 인증을 대신한다. 기본값 `false`. 배포에서는 켜지 않는다 |
+| `TRUSTED_PROXY_HOPS` | 아니오 | 신뢰하는 프록시 단계 수. `X-Forwarded-For`에서 클라이언트 IP를 읽을 때 쓴다. 기본값 `0` |
 
 `.env.example`에는 비밀이 아닌 변수 이름과 로컬 개발용 자리표시자만 둔다. 실제 비밀을 커밋하지 않는다.
 
