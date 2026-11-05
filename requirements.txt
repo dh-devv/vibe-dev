@@ -2,7 +2,6 @@
 # FastAPI & ASGI
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-<<<<<<< HEAD
 authlib==1.6.1
 itsdangerous==2.2.0
 
@@ -10,9 +9,6 @@ itsdangerous==2.2.0
 sqlalchemy[asyncio]==2.0.41
 alembic==1.16.4
 psycopg[binary]==3.2.10
-=======
-asyncpg==0.30.0
->>>>>>> 382e149d50f0c260af14e231ed70bff13a024f26
 
 # GitHub Copilot SDK
 github-copilot-sdk==1.0.28

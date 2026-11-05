@@ -6,6 +6,7 @@ from collections.abc import AsyncIterator
 from pathlib import Path
 from typing import Any, Literal, Protocol
 
+from src.agents.policy import tool_permission
 from src.agents.tools import calc_deadline
 from src.app.config import Settings
 
@@ -20,6 +21,10 @@ class TrialModel(Protocol):
     def run(self, role: Role, prompt: str) -> AsyncIterator[str]: ...
 
 
+class ModelNotConfiguredError(RuntimeError):
+    pass
+
+
 def load_prompt(role: Role) -> str:
     return (PROMPT_DIR / f"{role}.md").read_text(encoding="utf-8")
 
@@ -29,7 +34,11 @@ def approve_only_calc_deadline(request: Any, _context: Any) -> Any:
     from copilot.generated.rpc import PermissionDecisionApproveOnce, PermissionDecisionUserNotAvailable
     from copilot.session_events import PermissionRequestCustomTool
 
-    if isinstance(request, PermissionRequestCustomTool) and request.tool_name == ALLOWED_TOOL:
+    allowed = tool_permission(getattr(request, "tool_name", None), True)
+    if (
+        isinstance(request, PermissionRequestCustomTool)
+        and allowed["permissionDecision"] == "allow"
+    ):
         return PermissionDecisionApproveOnce()
     return PermissionDecisionUserNotAvailable()
 
@@ -47,13 +56,16 @@ class CopilotTrialModel:
     async def _ensure_client(self) -> Any:
         async with self._lock:
             if self._client is None:
+                token = self._settings.copilot_github_token
+                if not token:
+                    raise ModelNotConfiguredError
                 from copilot import CopilotClient
 
                 # 저장소 설정이나 훅을 읽지 않도록 비어 있는 임시 폴더에서 실행한다
                 self._workdir = tempfile.mkdtemp(prefix="vibe-copilot-work-")
                 self._base_dir = tempfile.mkdtemp(prefix="vibe-copilot-state-")
                 client = CopilotClient(
-                    github_token=self._settings.copilot_github_token,
+                    github_token=token,
                     working_directory=self._workdir,
                     base_directory=self._base_dir,
                 )

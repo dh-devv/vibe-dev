@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 from contextlib import aclosing
 from typing import Any
 
-from src.agents.model import Role, TrialModel
+from src.agents.model import ModelNotConfiguredError, Role, TrialModel
 from src.app.schemas import VerdictError, parse_verdict
 
 logger = logging.getLogger(__name__)
@@ -43,6 +43,10 @@ STRATEGIES: dict[str, tuple[str, ...]] = {
 }
 
 FAILURES: dict[str, tuple[str, bool]] = {
+    "MODEL_NOT_CONFIGURED": (
+        "AI 토큰 설정이 필요합니다. COPILOT_GITHUB_TOKEN을 확인해 주세요.",
+        False,
+    ),
     "MODEL_ERROR": ("법정에 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.", True),
     "TIMEOUT": ("재판이 너무 오래 걸려 중단했습니다. 다시 시도해 주세요.", True),
     "VERDICT_INVALID": ("판결문을 만들지 못했습니다. 다시 시도해 주세요.", True),
@@ -172,6 +176,8 @@ async def run_trial(
         yield "done", {}
     except TrialFailure as exc:
         yield _error_event(exc.code)
+    except ModelNotConfiguredError:
+        yield _error_event("MODEL_NOT_CONFIGURED")
     except TimeoutError:
         yield _error_event("TIMEOUT")
     except Exception as exc:
