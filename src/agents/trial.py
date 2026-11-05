@@ -10,7 +10,6 @@ from src.app.schemas import VerdictError, parse_verdict
 
 logger = logging.getLogger(__name__)
 
-MAX_STATEMENT_CHARS = 250
 STEPS: tuple[tuple[int, Role, str], ...] = (
     (1, "defense", "defense"),
     (2, "prosecution", "prosecution"),
@@ -67,8 +66,9 @@ def _escape(text: str) -> str:
     return text.replace("<", "&lt;").replace(">", "&gt;")
 
 
-def _case_block(case: str, deadline: str | None) -> str:
-    return f"<case>{_escape(case)}</case>\n<deadline>{deadline or '없음'}</deadline>"
+def _case_block(case: str, reason: str, deadline: str | None) -> str:
+    reason_text = f"\n미룬 이유: {_escape(reason)}" if reason else ""
+    return f"<case>{_escape(case)}{reason_text}</case>\n<deadline>{deadline or '없음'}</deadline>"
 
 
 def _transcript(statements: list[tuple[int, str, str]]) -> str:
@@ -76,14 +76,19 @@ def _transcript(statements: list[tuple[int, str, str]]) -> str:
 
 
 def _step_prompt(
-    stage: str, case: str, deadline: str | None, statements: list[tuple[int, str, str]], strategy: str
+    stage: str,
+    case: str,
+    reason: str,
+    deadline: str | None,
+    statements: list[tuple[int, str, str]],
+    strategy: str,
 ) -> str:
     instruction = {
         "defense": "변호인으로서 첫 변론을 하라.",
         "prosecution": "검사로서 변호인의 발언을 반박하라.",
         "rebuttal": "변호인으로서 검사의 발언에 재반박하라.",
     }[stage]
-    parts = [_case_block(case, deadline)]
+    parts = [_case_block(case, reason, deadline)]
     if statements:
         parts.append(_transcript(statements))
     parts.append(f"{instruction}\n이번 재판의 방향: {strategy}")
@@ -91,15 +96,20 @@ def _step_prompt(
 
 
 def _judge_prompt(
-    case: str, deadline: str | None, statements: list[tuple[int, str, str]], reason: str | None, strategy: str
+    case: str,
+    case_reason: str,
+    deadline: str | None,
+    statements: list[tuple[int, str, str]],
+    retry_reason: str | None,
+    strategy: str,
 ) -> str:
     parts = [
-        _case_block(case, deadline),
+        _case_block(case, case_reason, deadline),
         _transcript(statements),
         f"위 발언을 읽고 판결 JSON을 출력하라.\n이번 재판의 방향: {strategy}",
     ]
-    if reason:
-        parts.append(f"이전 출력이 검증에서 반려되었다. 사유: {reason}\n형식 규칙을 지켜 JSON만 다시 출력하라.")
+    if retry_reason:
+        parts.append(f"이전 출력이 검증에서 반려되었다. 사유: {retry_reason}\n형식 규칙을 지켜 JSON만 다시 출력하라.")
     return "\n\n".join(parts)
 
 
@@ -131,6 +141,7 @@ async def run_trial(
     submitted_at: str,
     model_timeout: float,
     trial_timeout: float,
+    case_reason: str = "",
 ) -> AsyncIterator[Event]:
     """변호인 → 검사 → 변호인 → 판사 → 검증기 순서를 코드가 정한다. 상태는 이 함수 안에서만 쓴다."""
     overall_deadline = asyncio.get_running_loop().time() + trial_timeout
@@ -141,17 +152,13 @@ async def run_trial(
         for n, role, stage in STEPS:
             yield "stage", {"stage": stage, "n": n}
             text = ""
-            prompt = _step_prompt(stage, case, deadline, statements, picks[role])
+            prompt = _step_prompt(stage, case, case_reason, deadline, statements, picks[role])
             async with aclosing(_bounded(model.run(role, prompt), overall_deadline, model_timeout)) as chunks:
                 async for delta in chunks:
-                    piece = delta[: MAX_STATEMENT_CHARS - len(text)]
-                    if piece:
-                        text += piece
-                        yield "statement", {"n": n, "role": role, "delta": piece}
-                    if len(text) >= MAX_STATEMENT_CHARS:
-                        break
-            text = text.strip()
-            if not text:
+                    if delta:
+                        text += delta
+                        yield "statement", {"n": n, "role": role, "delta": delta}
+            if not text.strip():
                 raise TrialFailure("MODEL_ERROR")
             statements.append((n, role, text))
             yield "statement_done", {"n": n, "role": role, "text": text}
@@ -162,7 +169,7 @@ async def run_trial(
             if attempt == 1:
                 yield "stage", {"stage": "retry", "n": None}
             yield "stage", {"stage": "judging", "n": None}
-            prompt = _judge_prompt(case, deadline, statements, reason, picks["judge"])
+            prompt = _judge_prompt(case, case_reason, deadline, statements, reason, picks["judge"])
             async with aclosing(_bounded(model.run("judge", prompt), overall_deadline, model_timeout)) as chunks:
                 raw = "".join([chunk async for chunk in chunks])
             try:

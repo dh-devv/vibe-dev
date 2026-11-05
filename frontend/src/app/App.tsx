@@ -63,6 +63,7 @@ export function App() {
       <header className="topbar">
         <Scales className="logo" />
         <span className="brand">미루기 재판소</span>
+        <span className="brand-note">나에게 맞는 시작 방법 찾기</span>
       </header>
 
       {screen === "new" && (
@@ -113,7 +114,7 @@ export function App() {
           <span aria-hidden="true">⚖</span>재판 열기
         </button>
         <button className={screen === "records" ? "on" : ""} onClick={() => setScreen("records")}>
-          <span aria-hidden="true">📜</span>이번 기록
+          <span aria-hidden="true">📜</span>실행 기록
         </button>
       </nav>
     </div>

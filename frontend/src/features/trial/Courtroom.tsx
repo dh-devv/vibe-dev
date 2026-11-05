@@ -1,8 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Beat, CaseInput, Speaker, Verdict } from "../../types";
-import { charCount } from "../../api/verdict";
 import { ApiError, runTrial } from "../../api/trial";
-import { STAGES, USER_SPEECH_MAX } from "../../mock/trial";
 import { AiBadge } from "../../components/Common";
 import { Person } from "../../components/PixelArt";
 
@@ -14,49 +12,18 @@ interface Props {
 
 const NAMES: Record<Speaker, string> = {
   judge: "판사",
-  jury: "배심원",
-  defense: "변호사",
-  prosecution: "검사",
-  user: "나(피고인)"
+  defense: "변호인",
+  prosecution: "검사"
 };
 
+const STAGES = ["변호인 변론", "검사 반박", "변호인 재반박", "판사 정리"] as const;
+
 // 위에서 내려다본 법정 배치. 좌표는 무대 크기에 대한 퍼센트다.
-const ACTORS: { id: string; speaker: Speaker; seat?: number; x: number; y: number }[] = [
+const ACTORS: { id: string; speaker: Speaker; x: number; y: number }[] = [
   { id: "judge", speaker: "judge", x: 50, y: 12 },
-  { id: "jury0", speaker: "jury", seat: 0, x: 13, y: 33 },
-  { id: "jury1", speaker: "jury", seat: 1, x: 13, y: 45 },
-  { id: "jury2", speaker: "jury", seat: 2, x: 13, y: 57 },
-  { id: "jury3", speaker: "jury", seat: 3, x: 13, y: 69 },
   { id: "defense", speaker: "defense", x: 33, y: 66 },
-  { id: "prosecution", speaker: "prosecution", x: 67, y: 66 },
-  { id: "user", speaker: "user", x: 50, y: 80 }
+  { id: "prosecution", speaker: "prosecution", x: 67, y: 66 }
 ];
-
-function useTypewriter(text: string) {
-  const reduce = useMemo(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
-  const chars = useMemo(() => Array.from(text), [text]);
-  const [n, setN] = useState(reduce ? chars.length : 0);
-
-  useEffect(() => {
-    if (reduce) {
-      setN(chars.length);
-      return;
-    }
-    setN(0);
-    const id = window.setInterval(() => {
-      setN((v) => {
-        if (v >= chars.length) {
-          window.clearInterval(id);
-          return v;
-        }
-        return v + 1;
-      });
-    }, 28);
-    return () => window.clearInterval(id);
-  }, [chars, reduce]);
-
-  return { shown: chars.slice(0, n).join(""), done: n >= chars.length, skip: () => setN(chars.length) };
-}
 
 export function Courtroom({ input, onFinish, onExit }: Props) {
   const [beats, setBeats] = useState<Beat[]>([]);
@@ -64,29 +31,39 @@ export function Courtroom({ input, onFinish, onExit }: Props) {
   const [submittedAt, setSubmittedAt] = useState(() => new Date().toISOString());
   const [error, setError] = useState<ApiError | null>(null);
   const [attempt, setAttempt] = useState(0);
-  const [asking, setAsking] = useState(false);
-  const [draft, setDraft] = useState("");
   const [idx, setIdx] = useState(0);
-  const resolveSpeech = useRef<((v: string) => void) | null>(null);
-
   useEffect(() => {
     const ctrl = new AbortController();
     setBeats([]);
     setVerdict(null);
     setError(null);
     setIdx(0);
-    setAsking(false);
-    const askUser = () =>
-      new Promise<string>((resolve) => {
-        resolveSpeech.current = resolve;
-        setAsking(true);
-      });
     (async () => {
       try {
-        for await (const ev of runTrial(input, { signal: ctrl.signal, askUser })) {
+        for await (const ev of runTrial(input, { signal: ctrl.signal })) {
           if (ev.type === "started") setSubmittedAt(ev.submittedAt);
           else if (ev.type === "beat") setBeats((b) => [...b, ev.beat]);
-          else setVerdict(ev.verdict);
+          else if (ev.type === "beat_delta") {
+            setBeats((current) => {
+              const existing = current.find((item) => item.n === ev.n);
+              if (existing) {
+                return current.map((item) =>
+                  item.n === ev.n ? { ...item, text: item.text + ev.delta, complete: false } : item
+                );
+              }
+              return [...current, {
+                n: ev.n,
+                speaker: ev.speaker,
+                stage: ev.stage,
+                text: ev.delta,
+                complete: false
+              }];
+            });
+          } else if (ev.type === "beat_finish") {
+            setBeats((current) =>
+              current.map((item) => item.n === ev.n ? { ...item, complete: true } : item)
+            );
+          } else setVerdict(ev.verdict);
         }
       } catch (e) {
         if (ctrl.signal.aborted) return;
@@ -97,27 +74,15 @@ export function Courtroom({ input, onFinish, onExit }: Props) {
   }, [input, attempt]);
 
   const beat = beats[idx];
-  const text = beat?.text ?? "재판관이 사건을 살펴보고 있습니다…";
-  const speaker: Speaker = beat?.speaker ?? "judge";
-  const typed = useTypewriter(text);
   const hasNext = idx < beats.length - 1;
-  const last = verdict !== null && !hasNext;
-  const showForm = asking && !hasNext && typed.done;
+  const last = verdict !== null && idx >= beats.length;
+  const speaker: Speaker = last ? "judge" : beat?.speaker ?? "defense";
+  const text = last ? verdict.summary : beat?.text ?? "";
 
   const next = () => {
-    if (!typed.done) {
-      typed.skip();
-      return;
-    }
-    if (hasNext) setIdx(idx + 1);
-    else if (verdict) onFinish(verdict, submittedAt);
-  };
-
-  const submitSpeech = (value: string) => {
-    resolveSpeech.current?.(value.trim());
-    resolveSpeech.current = null;
-    setAsking(false);
-    setDraft("");
+    if (beat?.complete && hasNext) setIdx(idx + 1);
+    else if (beat?.complete && verdict) setIdx(beats.length);
+    else if (last && verdict) onFinish(verdict, submittedAt);
   };
 
   if (error) {
@@ -142,13 +107,16 @@ export function Courtroom({ input, onFinish, onExit }: Props) {
     );
   }
 
-  const stageName = beat?.stage ?? STAGES[0];
-  const activeId = speaker === "jury" ? `jury${beat?.seat ?? 0}` : speaker;
-  const nameText = speaker === "jury" ? `배심원 ${(beat?.seat ?? 0) + 1}` : NAMES[speaker];
+  const stageName = last ? STAGES[3] : beat?.stage ?? STAGES[0];
+  const activeId = speaker;
+  const nameText = NAMES[speaker];
+  const canAdvance = Boolean(
+    (beat?.complete && (hasNext || idx === beats.length - 1 && verdict !== null)) || last
+  );
 
   return (
     <main className="screen court">
-      <ol className="stagebar" aria-label="재판 진행 단계">
+      <ol className="stagebar" aria-label="맞춤 방안 도출 단계">
         {STAGES.map((s) => (
           <li key={s} className={s === stageName ? "on" : ""} aria-current={s === stageName ? "step" : undefined}>
             {s}
@@ -156,12 +124,10 @@ export function Courtroom({ input, onFinish, onExit }: Props) {
         ))}
       </ol>
 
-      <div className="stage" role="img" aria-label="재판소를 위에서 내려다본 모습. 가운데 위에 판사, 왼쪽에 배심원, 가운데 아래에 변호사와 검사와 피고인이 있습니다.">
+      <div className="stage" role="img" aria-label="재판소를 위에서 내려다본 모습. 위쪽에 판사, 아래쪽에 변호인과 검사가 있습니다.">
         <div className="furn bench"><span>재판장석</span></div>
-        <div className="furn jurybox"><span>배심원석</span></div>
         <div className="furn table def"><span>변호인석</span></div>
         <div className="furn table pro"><span>검사석</span></div>
-        <div className="furn stand"><span>피고인석</span></div>
         <div className="furn rail" />
         <div className="furn decor flag" />
         <div className="furn decor shelf" />
@@ -170,7 +136,7 @@ export function Courtroom({ input, onFinish, onExit }: Props) {
           return (
             <div key={a.id} className={active ? "actor active" : "actor"} style={{ left: `${a.x}%`, top: `${a.y}%` }}>
               {active && <span className="bubble" aria-hidden="true">…</span>}
-              <Person speaker={a.speaker} seat={a.seat} className="sprite" />
+              <Person speaker={a.speaker} className="sprite" />
             </div>
           );
         })}
@@ -178,27 +144,19 @@ export function Courtroom({ input, onFinish, onExit }: Props) {
 
       <section className="px-box dialog" aria-label="자막">
         <div className="nameplate">
-          <span>{nameText}</span>
-          {beat?.ai && <AiBadge />}
+          {(beat || last) && <span>{last ? "공방을 정리한 판사" : nameText}</span>}
+          {(beat || last) && <AiBadge />}
         </div>
-        <p className="speech" aria-hidden="true">{typed.shown}</p>
-        <p className="sr-only" aria-live="polite">{typed.done ? `${nameText}: ${text}` : ""}</p>
+        {text && <p className="speech" aria-hidden="true">{text}</p>}
+        <p className="sr-only" aria-live="polite">{(beat?.complete || last) && text ? `${nameText}: ${text}` : ""}</p>
 
-        {showForm ? (
-          <div className="speak-form">
-            <label htmlFor="speech">피고인 발언 (최대 {USER_SPEECH_MAX}자)</label>
-            <textarea id="speech" className="px-input" rows={3} value={draft} onChange={(e) => setDraft(e.target.value)} />
-            <p className="hint">{charCount(draft)}/{USER_SPEECH_MAX}</p>
-            <div className="row">
-              <button className="px-btn primary" disabled={charCount(draft.trim()) < 1 || charCount(draft) > USER_SPEECH_MAX} onClick={() => submitSpeech(draft)}>
-                발언하기
-              </button>
-              <button className="px-btn" onClick={() => submitSpeech("")}>발언 생략</button>
-            </div>
-          </div>
-        ) : (
-          <button className="px-btn primary next" onClick={next} disabled={typed.done && !hasNext && !verdict}>
-            {!typed.done ? "건너뛰기 ▶▶" : last ? "판결 듣기 ▶" : hasNext ? "다음 ▶" : "판사가 생각 중…"}
+        {(beat || last) && (
+          <button className="px-btn primary next" onClick={next} disabled={!canAdvance}>
+            {last
+              ? "최적 방안 보기 ▶"
+              : canAdvance
+                ? idx === beats.length - 1 ? "판사 정리 보기 ▶" : "다음 발언 ▶"
+                : beat?.complete ? "판결 정리를 기다리는 중…" : "발언 생성 중…"}
           </button>
         )}
       </section>

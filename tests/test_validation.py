@@ -7,10 +7,13 @@ from src.app.schemas import ChecksInput, TrialInput, Verdict
 
 def test_trial_input_trims_and_validates_case_length() -> None:
     assert TrialInput(case="  안녕하세요  ").case == "안녕하세요"
+    assert TrialInput(case="안녕하세요", reason="  시작이 막막하다  ").reason == "시작이 막막하다"
     with pytest.raises(ValidationError):
         TrialInput(case="   ")
     with pytest.raises(ValidationError):
         TrialInput(case=123)
+    with pytest.raises(ValidationError):
+        TrialInput(case="안녕하세요", reason="짧음")
 
 
 def test_execution_checks_require_json_booleans() -> None:

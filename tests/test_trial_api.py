@@ -21,7 +21,11 @@ VALID_VERDICT = {
 
 
 class FakeModel:
+    def __init__(self) -> None:
+        self.prompts: list[str] = []
+
     async def run(self, role: str, _prompt: str) -> AsyncIterator[str]:
+        self.prompts.append(_prompt)
         if role == "judge":
             yield json.dumps(VALID_VERDICT, ensure_ascii=False)
         else:
@@ -46,14 +50,29 @@ def test_crisis_signal_is_rejected_before_stream(
     assert len(response.json()["helplines"]) == 3
 
 
+def test_crisis_signal_in_reason_is_rejected_before_stream(
+    api: tuple[TestClient, AppUser, AppUser],
+) -> None:
+    client, _, _ = api
+    response = client.post(
+        "/api/trial",
+        json={"case": "보고서를 작성해야 한다.", "reason": "죽고 싶다는 생각이 든다"},
+        headers={"X-CSRF-Token": "test-csrf-token"},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["code"] == "CRISIS_SIGNAL"
+
+
 def test_trial_rate_limit_and_sse_format(
     api: tuple[TestClient, AppUser, AppUser],
 ) -> None:
     client, _, _ = api
-    client.app.state.trial_model = FakeModel()
+    model = FakeModel()
+    client.app.state.trial_model = model
     client.app.state.settings.ip_per_minute = 1
     client.app.state.settings.user_per_minute = 1
-    payload = {"case": "보고서를 작성해야 한다."}
+    payload = {"case": "보고서를 작성해야 한다.", "reason": "무엇부터 할지 막막하다."}
 
     headers = {"X-CSRF-Token": "test-csrf-token"}
     first = client.post("/api/trial", json=payload, headers=headers)
@@ -61,6 +80,7 @@ def test_trial_rate_limit_and_sse_format(
     assert first.headers["content-type"].startswith("text/event-stream")
     assert "event: trial_started" in first.text
     assert "event: done" in first.text
+    assert "미룬 이유: 무엇부터 할지 막막하다." in model.prompts[0]
 
     second = client.post("/api/trial", json=payload, headers=headers)
     assert second.status_code == 429

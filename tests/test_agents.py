@@ -99,10 +99,15 @@ def test_each_stage_prompt_carries_a_strategy_and_streams_in_order() -> None:
                 yield json.dumps(VALID_VERDICT, ensure_ascii=False)
             else:
                 yield "발언 "
-                yield "내용"
+                yield "내용 "
 
     async def collect():
-        return [e async for e in run_trial(Recorder(), "보고서를 못 쓰고 있다", None, "2026-11-05T00:00:00Z", 5, 20)]
+        return [
+            e async for e in run_trial(
+                Recorder(), "보고서를 못 쓰고 있다", None, "2026-11-05T00:00:00Z", 5, 20,
+                case_reason="막막하다",
+            )
+        ]
 
     events = asyncio.run(collect())
     names = [name for name, _ in events]
@@ -110,5 +115,7 @@ def test_each_stage_prompt_carries_a_strategy_and_streams_in_order() -> None:
     assert names.count("statement") == 6 and names.count("statement_done") == 3
     assert names[-2:] == ["verdict", "done"]
     assert [r for r, _ in prompts] == ["defense", "prosecution", "defense", "judge"]
+    assert [data["delta"] for name, data in events if name == "statement"] == ["발언 ", "내용 "] * 3
+    assert [data["text"] for name, data in events if name == "statement_done"] == ["발언 내용 "] * 3
     for role, prompt in prompts:
         assert any(s in prompt for s in STRATEGIES[role])

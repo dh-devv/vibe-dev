@@ -44,17 +44,12 @@ const SKIN = "#f1c9a0";
 
 export const PALETTES: Record<Speaker, Record<string, string>> = {
   judge: { h: "#e8e0d0", s: SKIN, k: INK, b: "#2a1a10", d: "#6b4226", w: "#f3e2b3" },
-  jury: { h: "#5a3a1e", s: SKIN, k: INK, b: "#5b7fb0", d: "#35507a", w: "#f3e2b3" },
   defense: { h: "#3b2314", s: SKIN, k: INK, b: "#3a5f9e", d: "#223a66", w: "#ffffff" },
-  prosecution: { h: "#1d120a", s: SKIN, k: INK, b: "#b3261e", d: "#6e130f", w: "#ffffff" },
-  user: { h: "#a0521e", s: SKIN, k: INK, b: "#f4c542", d: "#c58b13", w: "#ffffff" }
+  prosecution: { h: "#1d120a", s: SKIN, k: INK, b: "#b3261e", d: "#6e130f", w: "#ffffff" }
 };
 
-const JURY_COATS = ["#5b7fb0", "#4f8a3c", "#8a5aa0", "#c58b13"];
-
-export function Person({ speaker, seat = 0, className }: { speaker: Speaker; seat?: number; className?: string }) {
-  const palette = speaker === "jury" ? { ...PALETTES.jury, b: JURY_COATS[seat % 4] } : PALETTES[speaker];
-  return <PixelArt rows={PERSON} palette={palette} className={className} />;
+export function Person({ speaker, className }: { speaker: Speaker; className?: string }) {
+  return <PixelArt rows={PERSON} palette={PALETTES[speaker]} className={className} />;
 }
 
 const COURTHOUSE = [

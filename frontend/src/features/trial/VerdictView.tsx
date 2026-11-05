@@ -13,19 +13,19 @@ export function VerdictView({ input, verdict, onAccept, onReject }: Props) {
     <main className="screen scroll">
       <article className="paper" aria-labelledby="verdict-title">
         <h1 id="verdict-title" className="paper-title">
-          판 결 문 <AiBadge />
+          지금 시작할 맞춤 방안 <AiBadge />
         </h1>
         <p className="paper-case">사건: {input.title}</p>
         <p>
-          미룬 원인(추정): <span className="cause">{verdict.cause}</span>
+          미루는 데 영향을 준 이유(추정): <span className="cause">{verdict.cause}</span>
         </p>
-        <h2>판결 요지</h2>
+        <h2>공방 정리</h2>
         <p>{verdict.summary}</p>
-        <h2>처방</h2>
+        <h2>추천 실행 방안</h2>
         {verdict.prescriptions.map((p, i) => (
           <section key={p.title} className="presc">
             <h3>
-              처방 {i + 1}. {p.title} <small>({p.minutes}분)</small>
+              방안 {i + 1}. {p.title} <small>({p.minutes}분)</small>
             </h3>
             <ol>
               {p.steps.map((s) => (
@@ -35,15 +35,15 @@ export function VerdictView({ input, verdict, onAccept, onReject }: Props) {
             <p className="hint">이유: {p.reason}</p>
           </section>
         ))}
-        <p className="hint">근거 발언: {verdict.evidence.map((n) => `${n}번`).join(", ")}</p>
-        <div className="seal" aria-hidden="true">판결</div>
+        <p className="hint">참고한 공방 발언: {verdict.evidence.map((n) => `${n}번`).join(", ")}</p>
+        <div className="seal" aria-hidden="true">추천</div>
       </article>
 
       <div className="row decision">
-        <button className="px-btn primary big" onClick={onAccept}>✔ 수용</button>
-        <button className="px-btn big" onClick={onReject}>✖ 기각</button>
+        <button className="px-btn primary big" onClick={onAccept}>이 방안으로 시작</button>
+        <button className="px-btn big" onClick={onReject}>다른 방안 찾기</button>
       </div>
-      <p className="note small center">수용한 판결은 이 화면의 기록에 담깁니다. 새로고침하면 사라집니다. 기각하면 담지 않습니다.</p>
+      <p className="note small center">시작을 선택한 방안은 내 기록에 추가됩니다. 다시 찾기를 선택하면 기록하지 않습니다.</p>
       <Disclaimer />
     </main>
   );

@@ -51,7 +51,7 @@ export function Execution({ record, onChecks }: Props) {
 
   return (
     <section className="px-box" aria-labelledby="exec-title">
-      <h2 id="exec-title" className="box-title">집행: {record.title}</h2>
+      <h2 id="exec-title" className="box-title">실행 계획: {record.title}</h2>
       {record.verdict.prescriptions.map((p, i) => (
         <div key={p.title} className="presc dark">
           <h3>{p.title} <small>({p.minutes}분)</small> <AiBadge /></h3>
@@ -68,7 +68,7 @@ export function Execution({ record, onChecks }: Props) {
           <Timer minutes={p.minutes} />
         </div>
       ))}
-      {record.completedAt && <p className="done" role="status">★ 모든 단계를 마쳤습니다. 집행 완료!</p>}
+      {record.completedAt && <p className="done" role="status">★ 모든 단계를 마쳤습니다. 실행 완료!</p>}
     </section>
   );
 }

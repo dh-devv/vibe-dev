@@ -31,12 +31,21 @@ class ApiModel(BaseModel):
 
 class TrialInput(ApiModel):
     case: str = Field(min_length=5, max_length=300)
+    reason: str | None = Field(default=None, min_length=5, max_length=200)
     deadline: date | None = None
 
     @field_validator("case", mode="before")
     @classmethod
     def strip_case(cls, value: object) -> object:
         return value.strip() if isinstance(value, str) else value
+
+    @field_validator("reason", mode="before")
+    @classmethod
+    def strip_reason(cls, value: object) -> object:
+        if isinstance(value, str):
+            stripped = value.strip()
+            return stripped or None
+        return value
 
     @model_validator(mode="after")
     def validate_deadline(self) -> TrialInput:

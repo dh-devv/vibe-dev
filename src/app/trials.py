@@ -30,7 +30,7 @@ async def trial(
     request: Request,
     user: AppUser = Depends(get_current_user_with_csrf),
 ) -> StreamingResponse:
-    if contains_crisis_signal(body.case):
+    if contains_crisis_signal(f"{body.case} {body.reason or ''}"):
         raise HTTPException(
             status_code=422,
             detail={
@@ -54,6 +54,7 @@ async def trial(
             datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             settings.model_timeout_seconds,
             settings.trial_timeout_seconds,
+            case_reason=body.reason or "",
         ):
             yield _event(name, data)
 

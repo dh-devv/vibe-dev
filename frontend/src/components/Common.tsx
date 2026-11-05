@@ -3,5 +3,5 @@ export function AiBadge() {
 }
 
 export function Disclaimer() {
-  return <p className="disclaimer">이 서비스는 의료·상담 서비스가 아니며, 판결은 AI가 생성한 참고 의견입니다.</p>;
+  return <p className="disclaimer">이 서비스는 의료·상담 서비스가 아니며, 제안하는 방안은 참고용입니다.</p>;
 }

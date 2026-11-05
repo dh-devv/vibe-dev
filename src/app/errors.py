@@ -33,6 +33,8 @@ def _validation_message(errors: list[Any]) -> str:
     fields = {str(part) for err in errors for part in err.get("loc", ())}
     if "case" in fields:
         return "사건 내용은 5자 이상 300자 이하로 입력해 주세요."
+    if "reason" in fields:
+        return "미룬 이유는 5자 이상 200자 이하로 입력해 주세요."
     if "deadline" in fields:
         return "마감일은 오늘부터 365일 이내의 YYYY-MM-DD 형식으로 입력해 주세요."
     return "요청 형식이 올바르지 않습니다. 입력 내용을 확인해 주세요."

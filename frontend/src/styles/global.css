@@ -40,10 +40,19 @@ button, input, textarea { font: inherit; }
 }
 .topbar .logo { width: 22px; height: 22px; }
 .topbar .brand { flex: 1; color: var(--gold); font-weight: 700; }
+.topbar .brand-note { color: #e8d3a8; font-size: 11px; }
 .topbar .who { font-size: 13px; background: var(--ink); padding: 0 10px; }
 .screen { flex: 1; min-height: 0; padding: 12px; display: flex; flex-direction: column; gap: 12px; }
 .screen.scroll { overflow-y: auto; }
 .page-title { margin: 0; color: var(--gold); font-size: 20px; text-shadow: 2px 2px 0 var(--ink); }
+.intro { padding: 4px 2px 0; }
+.intro .eyebrow { margin: 0 0 4px; color: var(--gold); font-size: 12px; font-weight: 700; }
+.intro .page-title { line-height: 1.4; }
+.intro-copy { margin: 6px 0 0; color: #f0dfc0; font-size: 13px; }
+.roles { display: grid; gap: 8px; }
+.roles div { display: grid; gap: 1px; border-left: 3px solid var(--gold); padding-left: 8px; }
+.roles strong { color: var(--gold); font-size: 13px; }
+.roles span { color: #f0dfc0; font-size: 12px; }
 
 .bottomnav {
   display: grid; grid-template-columns: repeat(2, 1fr);
@@ -200,6 +209,11 @@ button, input, textarea { font: inherit; }
 
 @media (min-width: 560px) {
   .app { border-left: 4px solid var(--ink); border-right: 4px solid var(--ink); }
+}
+@media (max-width: 420px) {
+  .topbar .brand-note { font-size: 10px; }
+  .screen { padding: 10px; gap: 10px; }
+  .intro .page-title { font-size: 18px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

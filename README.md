@@ -49,7 +49,7 @@ if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 docker compose up --build
 ```
 
-첫 실행은 이미지를 빌드하므로 시간이 걸릴 수 있습니다. 준비가 끝나면 웹 앱은 `http://localhost:5173`, 서버 상태 확인은 `http://localhost:8000/health`에서 할 수 있습니다. AI 연결에는 `.env`의 `COPILOT_GITHUB_TOKEN` 값만 설정하면 됩니다. 모델 코드는 수정할 필요가 없습니다. 앱 로그인(OIDC) 설정은 별도로 필요합니다. 토큰은 코드에 넣거나 커밋하지 마세요.
+첫 실행은 이미지를 빌드하므로 시간이 걸릴 수 있습니다. 준비가 끝나면 웹 앱은 `http://localhost:5173`, 서버 상태 확인은 `http://localhost:8000/health`에서 할 수 있습니다. 예시 대화나 판결문은 생성하지 않습니다. 실제 응답을 받으려면 `.env`에 `COPILOT_GITHUB_TOKEN`과 OIDC 설정을 넣고 이미지를 다시 빌드하세요. 토큰이 없으면 재판은 AI 응답 대신 설정 오류를 표시합니다. 토큰은 코드에 넣거나 커밋하지 마세요.
 
 실행 중 로그는 다른 PowerShell 창에서 `docker compose logs -f`로 확인합니다. 종료하려면 실행 창에서 `Ctrl+C`를 누릅니다. 백그라운드로 실행하려면 `docker compose up --build -d`, 종료하려면 `docker compose down`을 사용합니다. `docker compose down -v`는 로컬 DB 데이터를 삭제하므로 주의하세요.
 

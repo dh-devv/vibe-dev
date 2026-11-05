@@ -41,9 +41,9 @@ export function RecordsScreen({ records, selectedId, onSelect, onChecks, onDelet
 
   return (
     <main className="screen scroll">
-      <h1 className="page-title">내 기록</h1>
+      <h1 className="page-title">내 실행 기록</h1>
       <div className="stats">
-        <div className="px-box stat"><b>{records.length}</b><span>수용 건수</span></div>
+        <div className="px-box stat"><b>{records.length}</b><span>시작한 방안</span></div>
         <div className="px-box stat"><b>{rate}</b><span>이행률</span></div>
         <div className="px-box stat"><b>{start}</b><span>첫 체크까지</span></div>
       </div>
@@ -51,9 +51,9 @@ export function RecordsScreen({ records, selectedId, onSelect, onChecks, onDelet
       {selected && <Execution record={selected} onChecks={(c) => onChecks(selected.id, c)} />}
 
       <section className="px-box" aria-labelledby="list-title">
-        <h2 id="list-title" className="box-title">판결 목록</h2>
+        <h2 id="list-title" className="box-title">맞춤 방안 기록</h2>
         {records.length === 0 ? (
-          <p className="note">아직 수용한 판결이 없습니다. 재판을 열고 판결을 수용해 보세요.</p>
+          <p className="note">아직 시작한 방안이 없습니다. 재판을 열어 나에게 맞는 방법을 찾아보세요.</p>
         ) : (
           <ul className="rec-list">
             {records.map((r) => (
@@ -63,7 +63,7 @@ export function RecordsScreen({ records, selectedId, onSelect, onChecks, onDelet
                   <span>{r.verdict.prescriptions[0].title}{r.completedAt ? " · 완료" : ""}</span>
                 </div>
                 <div className="row">
-                  <button className="px-btn small" onClick={() => onSelect(r.id)}>집행 열기</button>
+                  <button className="px-btn small" onClick={() => onSelect(r.id)}>실행 열기</button>
                   <button className="px-btn small danger" onClick={() => setConfirming(r.id)}>삭제</button>
                 </div>
               </li>
@@ -86,7 +86,7 @@ export function RecordsScreen({ records, selectedId, onSelect, onChecks, onDelet
           </div>
         </div>
       )}
-      <p className="note small center">목업: 지금은 새로고침하면 기록이 사라집니다.</p>
+      <p className="note small center">현재 미리보기 기록은 새로고침하면 사라집니다.</p>
       <Disclaimer />
     </main>
   );

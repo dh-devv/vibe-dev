@@ -66,6 +66,7 @@ PWA 정적 UI는 `/`에서 제공한다 (`frontend/dist/index.html`). API·인�
 ```json
 {
   "case": "보고서를 3일째 못 쓰고 있다. 금요일까지다.",
+  "reason": "무엇부터 써야 할지 몰라 막막하다.",
   "deadline": "2026-11-07"
 }
 ```
@@ -73,6 +74,7 @@ PWA 정적 UI는 `/`에서 제공한다 (`frontend/dist/index.html`). API·인�
 | 필드 | 형식 | 필수 | 규칙 |
 | --- | --- | --- | --- |
 | `case` | string | 예 | 앞뒤 공백을 제거한 뒤 5~300자 |
+| `reason` | string | 아니오 | 미룬 이유. 앞뒤 공백을 제거한 뒤 5~200자 |
 | `deadline` | string \| null | 아니오 | `YYYY-MM-DD`. 오늘(UTC 기준 날짜)부터 365일 이내. 생략하거나 `null`이면 마감 없음 |
 
 그 밖의 필드는 무시한다.
@@ -84,7 +86,7 @@ PWA 정적 UI는 `/`에서 제공한다 (`frontend/dist/index.html`). API·인�
 | 순서 | 검사 | HTTP | `code` |
 | --- | --- | --- | --- |
 | 1 | JSON 형식, 필드 규칙 | 422 | `INVALID_INPUT` |
-| 2 | 위기 신호 (PRD 6절) | 422 | `CRISIS_SIGNAL` |
+| 2 | 사건 내용 또는 미룬 이유의 위기 신호 (PRD 6절) | 422 | `CRISIS_SIGNAL` |
 | 3 | IP별 분당·일일 한도 | 429 | `RATE_LIMITED` |
 | 4 | 사용자별 분당·일일 한도 | 429 | `RATE_LIMITED` |
 | 5 | 전체 일일 한도 | 429 | `DAILY_LIMIT` |
@@ -156,6 +158,7 @@ data: {"n":1,"role":"defense","delta":"미루는 데에는 "}
 
 순서: `trial_started` → `stage(defense)` → `statement`… → `statement_done` → `stage(prosecution)` → … → `stage(rebuttal)` → … → `stage(judging)` → `verdict` → `done`.
 판결 검증이 실패해 판사를 다시 부르면 `stage(retry)`를 한 번 보낸 뒤 `stage(judging)`부터 다시 한다. 판사의 출력은 JSON이므로 글자 단위로 보내지 않고 검증 후 `verdict` 하나로 보낸다.
+UI는 각 `statement.delta`를 변형하지 않고 도착한 순서대로 표시한다.
 `error`가 나오면 `verdict`와 `done`은 오지 않는다.
 클라이언트가 연결을 끊으면 서버는 남은 모델 호출을 중단한다.
 

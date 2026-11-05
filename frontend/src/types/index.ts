@@ -14,14 +14,14 @@ export interface Verdict {
   evidence: number[];
 }
 
-export type Speaker = "judge" | "jury" | "defense" | "prosecution" | "user";
+export type Speaker = "judge" | "defense" | "prosecution";
 
 export interface Beat {
+  n: number;
   speaker: Speaker;
-  seat?: number;
   stage: string;
   text: string;
-  ai: boolean;
+  complete: boolean;
 }
 
 export interface Helpline {

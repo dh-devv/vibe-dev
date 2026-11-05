@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import type { CaseInput, Sample } from "../../types";
 import { charCount } from "../../api/verdict";
-import { HELPLINES, mockCrisisCheck } from "../../mock/trial";
 import { Disclaimer } from "../../components/Common";
 
 interface Props {
@@ -20,7 +19,6 @@ export function CaseForm({ onSubmit }: Props) {
   const [reason, setReason] = useState("");
   const [deadline, setDeadline] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [crisis, setCrisis] = useState(false);
   const [samples, setSamples] = useState<Sample[]>([]);
 
   useEffect(() => {
@@ -36,7 +34,6 @@ export function CaseForm({ onSubmit }: Props) {
     setReason(s.reason);
     setDeadline(s.deadline ?? "");
     setErrors({});
-    setCrisis(false);
   };
 
   const submit = (e: React.FormEvent) => {
@@ -51,31 +48,22 @@ export function CaseForm({ onSubmit }: Props) {
     if (deadline && (deadline < today(0) || deadline > today(365))) next.deadline = "마감일은 오늘부터 365일 이내로 골라 주세요.";
     setErrors(next);
     if (Object.keys(next).length) return;
-    if (mockCrisisCheck(`${t} ${c} ${r}`)) {
-      setCrisis(true);
-      return;
-    }
-    setCrisis(false);
     onSubmit({ title: t, caseText: c, reason: r, deadline: deadline || null });
   };
 
   return (
     <main className="screen scroll">
-      <h1 className="page-title">재판 열기</h1>
+      <header className="intro">
+        <p className="eyebrow">미루기 재판소</p>
+        <h1 className="page-title">잘잘못 대신, 시작할 방법을 찾습니다</h1>
+        <p className="intro-copy">미루고 있는 일을 적으면 세 AI가 서로 다른 관점에서 살펴보고, 판사가 지금 할 수 있는 맞춤 실행안을 제안합니다.</p>
+      </header>
 
-      {crisis && (
-        <section className="px-box crisis" role="alert" aria-labelledby="crisis-title">
-          <h2 id="crisis-title" className="box-title">지금은 재판보다 도움이 먼저입니다</h2>
-          <p>아래 상담 전화로 바로 연락해 주세요.</p>
-          <ul>
-            {HELPLINES.map((h) => (
-              <li key={h.phone}>
-                {h.name}: <strong>{h.phone}</strong> ({h.hours})
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <section className="px-box roles" aria-label="AI 역할 안내">
+        <div><strong>변호인 AI</strong><span>미루는 마음과 이유를 살핍니다</span></div>
+        <div><strong>검사 AI</strong><span>미룰 때 생기는 현실적인 비용을 짚습니다</span></div>
+        <div><strong>판사 AI</strong><span>공방을 읽고 실행 방안을 정리합니다</span></div>
+      </section>
 
       <section className="px-box" aria-labelledby="sample-title">
         <h2 id="sample-title" className="box-title">예시 사건</h2>
@@ -89,6 +77,7 @@ export function CaseForm({ onSubmit }: Props) {
       </section>
 
       <form className="px-box" onSubmit={submit} noValidate>
+        <h2 className="box-title">어떤 일을 미루고 있나요?</h2>
         <div className="field">
           <label htmlFor="c-title">재판 이름</label>
           <input id="c-title" className="px-input" value={title} maxLength={60} onChange={(e) => setTitle(e.target.value)} aria-describedby="e-title" placeholder="예) 보고서 미루기 사건" />
@@ -111,8 +100,8 @@ export function CaseForm({ onSubmit }: Props) {
           <input id="c-deadline" type="date" className="px-input" value={deadline} min={today(0)} max={today(365)} onChange={(e) => setDeadline(e.target.value)} aria-describedby="e-deadline" />
           <p id="e-deadline" className="err" role="alert">{errors.deadline}</p>
         </div>
-        <p className="note small">접수하면 입력한 내용이 AI 제공자에게 전송됩니다. 판결을 수용하면 이 화면의 기록에 담기고, 기각하면 담지 않습니다. 새로고침하면 기록은 사라집니다.</p>
-        <button type="submit" className="px-btn primary big">⚖ 재판 시작</button>
+        <p className="note small">AI 토큰을 설정한 뒤 재판을 시작하면 사건 내용과 미룬 이유가 AI 제공자에게 전송됩니다. 현재 기록은 브라우저에서만 유지되며 새로고침하면 사라집니다.</p>
+        <button type="submit" className="px-btn primary big">⚖ 세 AI의 공방 시작</button>
       </form>
       <Disclaimer />
     </main>

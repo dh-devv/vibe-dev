@@ -1,18 +1,17 @@
 import type { Beat, CaseInput, Helpline, Verdict } from "../types";
 import { isVerdict } from "./verdict";
 
-// 재판 한 번을 이벤트 흐름으로 받는다. 화면은 이 흐름만 알고, 문장이 AI에서 오는지 목업에서 오는지는 모른다.
-// 실제 서버는 API_SPEC 5절을 따른다. 목업은 VITE_USE_MOCK=true일 때만 쓴다.
+// 재판 한 번을 서버 이벤트 흐름으로 받는다.
 
 export type TrialEvent =
   | { type: "started"; submittedAt: string }
   | { type: "beat"; beat: Beat }
+  | { type: "beat_delta"; n: number; speaker: Beat["speaker"]; stage: string; delta: string }
+  | { type: "beat_finish"; n: number }
   | { type: "verdict"; verdict: Verdict };
 
 export interface TrialOptions {
   signal: AbortSignal;
-  // 목업 전용. 실제 서버에는 사용자 발언 요청이 아직 없다(문서 합의 전).
-  askUser?: () => Promise<string>;
 }
 
 export class ApiError extends Error {
@@ -27,13 +26,19 @@ export class ApiError extends Error {
 }
 
 const TOTAL_TIMEOUT_MS = 90_000;
-const STAGE_LABEL: Record<string, string> = { defense: "변론", prosecution: "반박", rebuttal: "반박" };
-const SPEAKERS = new Set(["judge", "jury", "defense", "prosecution"]);
+const STAGE_LABEL: Record<string, string> = {
+  defense: "변호인 변론",
+  prosecution: "검사 반박",
+  rebuttal: "변호인 재반박",
+};
+const SPEAKERS = new Set(["defense", "prosecution"]);
 
-// API_SPEC은 case 하나(5~300자)만 받는다. 재판 이름과 사유를 합치는 방식은 합의 전이다.
 function toRequestBody(input: CaseInput) {
-  const merged = `${input.caseText.trim()} (미룬 이유: ${input.reason.trim()})`;
-  return { case: Array.from(merged).slice(0, 300).join(""), deadline: input.deadline };
+  return {
+    case: input.caseText.trim(),
+    reason: input.reason.trim(),
+    deadline: input.deadline
+  };
 }
 
 async function* parseSse(body: ReadableStream<Uint8Array>): AsyncGenerator<{ event: string; data: unknown }> {
@@ -86,13 +91,46 @@ async function* serverTrial(input: CaseInput, { signal }: TrialOptions): AsyncGe
   if (!res.ok || !res.body) throw await toApiError(res);
 
   let stage = "";
+  const streamedStatements = new Map<number, string>();
   try {
     for await (const { event, data } of parseSse(res.body)) {
       const d = data as Record<string, unknown>;
       if (event === "trial_started") yield { type: "started", submittedAt: String(d.submittedAt) };
       else if (event === "stage") stage = String(d.stage);
-      else if (event === "statement_done" && SPEAKERS.has(String(d.role))) {
-        yield { type: "beat", beat: { speaker: d.role as Beat["speaker"], stage: STAGE_LABEL[stage] ?? "변론", text: String(d.text), ai: true } };
+      else if (event === "statement" && SPEAKERS.has(String(d.role))) {
+        const n = Number(d.n);
+        if (!Number.isInteger(n) || n < 1) continue;
+        if (typeof d.delta !== "string") {
+          throw new ApiError("STREAM_INVALID", "AI 발언 형식이 올바르지 않습니다.", false);
+        }
+        const speaker = d.role as Beat["speaker"];
+        const label = STAGE_LABEL[stage] ?? "변호인 변론";
+        streamedStatements.set(n, (streamedStatements.get(n) ?? "") + d.delta);
+        yield { type: "beat_delta", n, speaker, stage: label, delta: d.delta };
+      } else if (event === "statement_done" && SPEAKERS.has(String(d.role))) {
+        const n = Number(d.n);
+        if (!Number.isInteger(n) || n < 1) continue;
+        if (typeof d.text !== "string") {
+          throw new ApiError("STREAM_INVALID", "AI 발언 형식이 올바르지 않습니다.", false);
+        }
+        const streamedText = streamedStatements.get(n);
+        if (streamedText !== undefined) {
+          if (streamedText !== d.text) {
+            throw new ApiError("STREAM_INVALID", "AI 발언 형식이 올바르지 않습니다.", false);
+          }
+          yield { type: "beat_finish", n };
+        } else {
+          yield {
+            type: "beat",
+            beat: {
+              n,
+              speaker: d.role as Beat["speaker"],
+              stage: STAGE_LABEL[stage] ?? "변호인 변론",
+              text: d.text,
+              complete: true
+            }
+          };
+        }
       } else if (event === "verdict") {
         if (!isVerdict(d)) throw new ApiError("VERDICT_INVALID", "판결문을 만들지 못했습니다. 다시 시도해 주세요.", true);
         yield { type: "verdict", verdict: d };
@@ -107,22 +145,6 @@ async function* serverTrial(input: CaseInput, { signal }: TrialOptions): AsyncGe
   }
 }
 
-async function* mockTrial(input: CaseInput, { signal, askUser }: TrialOptions): AsyncGenerator<TrialEvent> {
-  const { makeBeats, makeVerdict } = await import("../mock/trial");
-  const wait = (ms: number) => new Promise<void>((r) => window.setTimeout(r, ms));
-  yield { type: "started", submittedAt: new Date().toISOString() };
-  let beats = makeBeats(input, null);
-  for (let i = 0; i < beats.length; i++) {
-    if (signal.aborted) return;
-    await wait(700);
-    yield { type: "beat", beat: beats[i] };
-    if (beats[i].speaker === "judge" && beats[i + 1]?.speaker === "user" && askUser) {
-      beats = makeBeats(input, await askUser());
-    }
-  }
-  yield { type: "verdict", verdict: makeVerdict(input) };
-}
-
 export function runTrial(input: CaseInput, options: TrialOptions): AsyncGenerator<TrialEvent> {
-  return import.meta.env.VITE_USE_MOCK === "true" ? mockTrial(input, options) : serverTrial(input, options);
+  return serverTrial(input, options);
 }
