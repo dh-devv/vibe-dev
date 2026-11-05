@@ -1,0 +1,12 @@
+name: vibe-dev
+metadata:
+  template: vibe-dev
+services:
+  web:
+    project: .
+    host: containerapp
+    language: python
+    docker:
+      path: ./Dockerfile
+      context: .
+      remoteBuild: true

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": { "value": "${AZURE_ENV_NAME}" },
+    "location": { "value": "${AZURE_LOCATION}" },
+    "copilotGithubToken": { "value": "${COPILOT_GITHUB_TOKEN}" },
+    "postgresPassword": { "value": "${POSTGRES_PASSWORD}" },
+    "sessionSecretKey": { "value": "${SESSION_SECRET_KEY}" },
+    "oidcIssuer": { "value": "${OIDC_ISSUER=}" },
+    "oidcClientId": { "value": "${OIDC_CLIENT_ID=}" },
+    "oidcClientSecret": { "value": "${OIDC_CLIENT_SECRET=}" },
+    "copilotModel": { "value": "${COPILOT_MODEL=}" }
+  }
+}
