@@ -2,15 +2,25 @@
 # FastAPI & ASGI
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
+<<<<<<< HEAD
+authlib==1.6.1
+itsdangerous==2.2.0
+
+# PostgreSQL & migrations
+sqlalchemy[asyncio]==2.0.41
+alembic==1.16.4
+psycopg[binary]==3.2.10
+=======
 asyncpg==0.30.0
+>>>>>>> 382e149d50f0c260af14e231ed70bff13a024f26
 
 # GitHub Copilot SDK
 github-copilot-sdk==1.0.28
 agent-framework-github-copilot==2.1.1
 
 # 입력 검증 & 유틸리티
-pydantic==2.11.7
-pydantic-settings==2.10.1
+pydantic==2.12.5
+pydantic-settings==2.12.0
 python-dotenv==1.0.0
 
 # 로깅
@@ -20,6 +30,7 @@ python-json-logger==2.0.7
 pytest==7.4.3
 pytest-asyncio==0.21.1
 httpx==0.25.1
+aiosqlite==0.21.0
 
 # 개발 도구 (선택)
 black==23.12.0

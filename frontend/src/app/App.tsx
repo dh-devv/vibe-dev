@@ -1,7 +1,5 @@
 import { useState } from "react";
 import type { CaseInput, TrialRecord, Verdict } from "../types";
-import { makeVerdict } from "../mock/trial";
-import { LoginScreen } from "../features/auth/LoginScreen";
 import { CaseForm } from "../features/trial/CaseForm";
 import { Courtroom } from "../features/trial/Courtroom";
 import { VerdictView } from "../features/trial/VerdictView";
@@ -17,13 +15,10 @@ interface Trial {
 }
 
 export function App() {
-  const [user, setUser] = useState<string | null>(null);
   const [screen, setScreen] = useState<Screen>("new");
   const [trial, setTrial] = useState<Trial | null>(null);
   const [records, setRecords] = useState<TrialRecord[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-
-  if (!user) return <LoginScreen onLogin={(n) => { setUser(n); setScreen("new"); }} />;
 
   const accept = () => {
     if (!trial?.verdict) return;
@@ -63,19 +58,11 @@ export function App() {
     );
   };
 
-  const logout = () => {
-    setUser(null);
-    setTrial(null);
-    setRecords([]);
-    setSelectedId(null);
-  };
-
   return (
     <div className="app">
       <header className="topbar">
         <Scales className="logo" />
         <span className="brand">미루기 재판소</span>
-        <span className="who">{user}</span>
       </header>
 
       {screen === "new" && (
@@ -89,10 +76,11 @@ export function App() {
       {screen === "trial" && trial && (
         <Courtroom
           input={trial.input}
-          onFinish={() => {
-            setTrial({ ...trial, verdict: makeVerdict(trial.input) });
+          onFinish={(verdict, submittedAt) => {
+            setTrial({ ...trial, submittedAt, verdict });
             setScreen("verdict");
           }}
+          onExit={() => { setTrial(null); setScreen("new"); }}
         />
       )}
       {screen === "verdict" && trial?.verdict && (
@@ -117,7 +105,6 @@ export function App() {
             if (selectedId === id) setSelectedId(null);
           }}
           onDeleteAll={() => { setRecords([]); setSelectedId(null); }}
-          onDeleteAccount={logout}
         />
       )}
 
@@ -126,10 +113,7 @@ export function App() {
           <span aria-hidden="true">⚖</span>재판 열기
         </button>
         <button className={screen === "records" ? "on" : ""} onClick={() => setScreen("records")}>
-          <span aria-hidden="true">📜</span>내 기록
-        </button>
-        <button onClick={logout}>
-          <span aria-hidden="true">🚪</span>나가기
+          <span aria-hidden="true">📜</span>이번 기록
         </button>
       </nav>
     </div>

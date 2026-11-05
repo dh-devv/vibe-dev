@@ -46,7 +46,7 @@ button, input, textarea { font: inherit; }
 .page-title { margin: 0; color: var(--gold); font-size: 20px; text-shadow: 2px 2px 0 var(--ink); }
 
 .bottomnav {
-  display: grid; grid-template-columns: repeat(3, 1fr);
+  display: grid; grid-template-columns: repeat(2, 1fr);
   background: var(--wood); border-top: 4px solid var(--ink);
   padding-bottom: env(safe-area-inset-bottom);
 }

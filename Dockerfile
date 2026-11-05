@@ -8,7 +8,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src ./src
 
+<<<<<<< HEAD
+RUN useradd --system --no-create-home app
+=======
 RUN useradd --system --create-home app
+>>>>>>> 382e149d50f0c260af14e231ed70bff13a024f26
 USER app
 
 EXPOSE 8000

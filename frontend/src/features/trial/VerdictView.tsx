@@ -43,7 +43,7 @@ export function VerdictView({ input, verdict, onAccept, onReject }: Props) {
         <button className="px-btn primary big" onClick={onAccept}>✔ 수용</button>
         <button className="px-btn big" onClick={onReject}>✖ 기각</button>
       </div>
-      <p className="note small center">수용한 판결만 내 계정에 저장됩니다. 기각하면 저장하지 않습니다.</p>
+      <p className="note small center">수용한 판결은 이 화면의 기록에 담깁니다. 새로고침하면 사라집니다. 기각하면 담지 않습니다.</p>
       <Disclaimer />
     </main>
   );

@@ -1,3 +1,12 @@
+<<<<<<< HEAD
+from __future__ import annotations
+
+from datetime import date, datetime, timedelta, timezone
+from typing import Annotated, Literal
+from uuid import UUID
+
+from pydantic import (
+=======
 import json
 import re
 from datetime import UTC, date, datetime, timedelta
@@ -5,10 +14,84 @@ from typing import Annotated, Literal
 
 from pydantic import (
     AwareDatetime,
+>>>>>>> 382e149d50f0c260af14e231ed70bff13a024f26
     BaseModel,
     ConfigDict,
     Field,
     StrictBool,
+<<<<<<< HEAD
+    StrictInt,
+    field_validator,
+    model_validator,
+)
+
+CAUSES = ("막막함", "완벽주의", "흥미 상실", "시간 부족", "피로")
+
+
+class ApiModel(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, extra="ignore")
+
+
+class TrialInput(ApiModel):
+    case: str = Field(min_length=5, max_length=300)
+    deadline: date | None = None
+
+    @field_validator("case", mode="before")
+    @classmethod
+    def strip_case(cls, value: object) -> object:
+        return value.strip() if isinstance(value, str) else value
+
+    @model_validator(mode="after")
+    def validate_deadline(self) -> TrialInput:
+        if self.deadline is not None:
+            today = datetime.now(timezone.utc).date()
+            if not today <= self.deadline <= today + timedelta(days=365):
+                raise ValueError("마감일은 오늘부터 365일 이내여야 합니다.")
+        return self
+
+
+class Prescription(ApiModel):
+    title: str = Field(min_length=1, max_length=30)
+    steps: list[str] = Field(min_length=2, max_length=4)
+    minutes: StrictInt = Field(ge=5, le=120)
+    reason: str = Field(min_length=1, max_length=150)
+
+    @field_validator("steps")
+    @classmethod
+    def validate_steps(cls, steps: list[str]) -> list[str]:
+        if any(not step.strip() or len(step) > 80 for step in steps):
+            raise ValueError("각 단계는 1자 이상 80자 이하여야 합니다.")
+        return steps
+
+
+class Verdict(ApiModel):
+    summary: str = Field(min_length=1, max_length=400)
+    cause: Literal["막막함", "완벽주의", "흥미 상실", "시간 부족", "피로"]
+    prescriptions: list[Prescription] = Field(min_length=1, max_length=2)
+    evidence: list[Annotated[StrictInt, Field(ge=1, le=3)]] = Field(
+        min_length=1, max_length=3
+    )
+
+    @field_validator("evidence")
+    @classmethod
+    def unique_evidence(cls, evidence: list[StrictInt]) -> list[StrictInt]:
+        if len(set(evidence)) != len(evidence):
+            raise ValueError("근거 번호는 중복될 수 없습니다.")
+        return evidence
+
+
+class AcceptedVerdict(ApiModel):
+    summary: str = Field(min_length=1, max_length=400)
+    cause: Literal["막막함", "완벽주의", "흥미 상실", "시간 부족", "피로"]
+    prescriptions: list[Prescription] = Field(min_length=1, max_length=2)
+
+
+class CreateRecordInput(ApiModel):
+    case: str = Field(min_length=5, max_length=300)
+    deadline: date | None = None
+    submitted_at: datetime = Field(alias="submittedAt")
+    verdict: AcceptedVerdict
+=======
     ValidationError,
     field_validator,
 )
@@ -102,10 +185,47 @@ class TrialRequest(BaseModel):
 
     case: str = Field(min_length=5, max_length=300)
     deadline: str | None = None
+>>>>>>> 382e149d50f0c260af14e231ed70bff13a024f26
 
     @field_validator("case", mode="before")
     @classmethod
     def strip_case(cls, value: object) -> object:
+<<<<<<< HEAD
+        return value.strip() if isinstance(value, str) else value
+
+    @field_validator("submitted_at")
+    @classmethod
+    def require_aware_timestamp(cls, value: datetime) -> datetime:
+        if value.tzinfo is None:
+            raise ValueError("submittedAt에는 시간대가 필요합니다.")
+        if value.astimezone(timezone.utc) > datetime.now(timezone.utc):
+            raise ValueError("submittedAt은 미래 시각일 수 없습니다.")
+        return value.astimezone(timezone.utc)
+
+    @model_validator(mode="after")
+    def validate_deadline(self) -> CreateRecordInput:
+        if self.deadline is not None:
+            today = datetime.now(timezone.utc).date()
+            if not today <= self.deadline <= today + timedelta(days=365):
+                raise ValueError("마감일은 오늘부터 365일 이내여야 합니다.")
+        return self
+
+
+class ChecksInput(ApiModel):
+    checks: list[list[StrictBool]]
+
+
+class RecordOut(ApiModel):
+    id: UUID
+    case: str
+    deadline: date | None
+    verdict: AcceptedVerdict
+    checks: list[list[bool]]
+    submitted_at: datetime = Field(alias="submittedAt")
+    accepted_at: datetime = Field(alias="acceptedAt")
+    first_checked_at: datetime | None = Field(alias="firstCheckedAt")
+    completed_at: datetime | None = Field(alias="completedAt")
+=======
         return clean_case(value)
 
     @field_validator("deadline")
@@ -145,3 +265,4 @@ class ChecksUpdate(BaseModel):
     model_config = ConfigDict(extra="ignore")
 
     checks: list[list[StrictBool]]
+>>>>>>> 382e149d50f0c260af14e231ed70bff13a024f26

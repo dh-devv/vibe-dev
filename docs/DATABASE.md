@@ -30,7 +30,7 @@ volumes:
 
 로컬 `.env`의 연결 주소는 `postgresql://vibe_dev:local-dev-only@localhost:5432/vibe_dev`를 쓴다. 이 개발용 비밀번호를 Azure나 커밋에 사용하지 않는다.
 
-가입·로그인은 관리형 OAuth/OIDC 제공자가 처리한다. 공급자는 구현 전에 정한다. 앱은 비밀번호를 받거나 저장하지 않으며, 인증된 OIDC `issuer`와 `subject`를 사용자 식별자로 쓴다. 이메일은 소유권 키로 쓰지 않는다.
+가입·로그인은 Microsoft Entra External ID가 처리한다. 앱은 비밀번호를 받거나 저장하지 않으며, 검증된 OIDC `issuer`와 `subject`를 사용자 식별자로 쓴다. 이메일은 소유권 키로 쓰지 않는다.
 
 재판 입력은 모델 제공자에게 전송된다. 사용자가 판결을 수용하기 전에는 DB에 기록하지 않는다. 수용 시 사건 내용·마감일·판결·집행 진행을 저장하되, 공방 발언은 저장하지 않는다. 이 처리와 보관을 재판 전에 사용자에게 알린다.
 
@@ -126,9 +126,14 @@ volumes:
 | 이름 | 필수 | 설명 |
 | --- | --- | --- |
 | `DATABASE_URL` | 예 | PostgreSQL 연결 문자열. 비밀 저장소에서 주입 |
-| `OIDC_ISSUER` | 예 | 인증 제공자의 발급자 URL |
+| `OIDC_ISSUER` | 예 | Entra External ID 발급자 URL. 서버가 `/.well-known/openid-configuration`을 조회 |
 | `OIDC_CLIENT_ID` | 예 | 앱 등록의 클라이언트 ID |
 | `OIDC_CLIENT_SECRET` | 공급자 방식에 따라 | 비밀 클라이언트 앱일 때만 비밀 저장소에서 주입 |
+| `SESSION_SECRET_KEY` | 예 | 세션 쿠키 서명 키. 충분히 긴 임의 값으로 만들고 비밀 저장소에서 주입 |
+| `PUBLIC_BASE_URL` | 예 | 앱의 외부 기본 주소. OIDC redirect URI `{PUBLIC_BASE_URL}/auth/callback` 생성에 사용 |
+| `SESSION_TTL_SECONDS` | 아니오 | 세션 유효 시간(초), 기본값 `28800` |
+| `COOKIE_SECURE` | 아니오 | HTTPS 전용 쿠키 여부. 기본값은 `true`; 로컬 HTTP에서만 `false` |
+| `TRUSTED_PROXY_IPS` | 아니오 | 전달 IP 헤더를 신뢰할 프록시 IP/CIDR 목록 |
 | `COPILOT_GITHUB_TOKEN` | 예 | Copilot 호출 토큰. 비밀 저장소에서 주입 |
 | `PORT` | 아니오 | 기본값 `8000` |
 | `LOG_LEVEL` | 아니오 | 기본값 `INFO` |
