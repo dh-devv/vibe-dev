@@ -1,0 +1,26 @@
+
+# FastAPI & ASGI
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# GitHub Copilot SDK
+github-copilot-sdk==0.1.0
+agent-framework-github-copilot==0.1.0
+
+# 입력 검증 & 유틸리티
+pydantic==2.5.0
+pydantic-settings==2.1.0
+python-dotenv==1.0.0
+
+# 로깅
+python-json-logger==2.0.7
+
+# 테스트
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.1
+
+# 개발 도구 (선택)
+black==23.12.0
+flake8==6.1.0
+isort==5.13.2
