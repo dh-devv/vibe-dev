@@ -10,13 +10,14 @@ AI에게 작업을 시킬 때는 항상 [AGENTS.md](../AGENTS.md), [PRD.md](../P
 | 도구 | 용도 | 상태 |
 | --- | --- | --- |
 | Python 3.12 | 서버 | 설치됨 (3.12.10) |
+| Node.js LTS + npm | React·TypeScript PWA 개발·빌드 | 팀원별 설치 |
 | Git | 버전 관리 | 설치됨 |
 | VS Code + GitHub Copilot | 개발 (대회 규정상 이 도구만 허용) | 각자 준비 |
 | Azure CLI (`az`) | Azure 로그인 | **미설치** (담당: 변동헌) |
 | Azure Developer CLI (`azd`) | 배포 | **미설치** (담당: 변동헌) |
-| Docker | 컨테이너 빌드 | **미확인** (담당: 변동헌) |
+| Docker Desktop | 로컬 PostgreSQL 실행·앱 컨테이너 빌드 | **미확인** (담당: 변동헌) |
 
-로컬 개발에는 Python과 Git만 있으면 된다. Azure 도구는 배포 담당만 필요하다. "설치됨" 표시는 변동헌의 PC 기준이며, 다른 팀원은 각자 확인한다.
+백엔드 개발에는 Python과 Git, 프런트엔드 개발에는 Node.js와 npm이 필요하다. 전체 로컬 테스트에는 Docker가 필요하다. Azure 도구는 배포 담당만 필요하다. "설치됨" 표시는 변동헌의 PC 기준이며, 다른 팀원은 각자 확인한다.
 
 ### 1.2 처음 시작하기
 
@@ -25,7 +26,7 @@ git clone https://github.com/dh-devv/vibe-dev.git
 cd vibe-dev
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-Copy-Item .env.example .env      # COPILOT_GITHUB_TOKEN은 담당자에게 받아 .env에만 적는다
+Copy-Item .env.example .env      # 로컬 DB 연결값과 비밀 설정은 .env에만 둔다
 pip install -r requirements.txt  # requirements.txt는 백엔드가 만든다
 ```
 
@@ -36,7 +37,10 @@ pip install -r requirements.txt  # requirements.txt는 백엔드가 만든다
 | 하는 일 | 명령 |
 | --- | --- |
 | 서버 실행 | `uvicorn src.app.main:app --reload --port 8000` |
-| 화면 확인 | 브라우저에서 `http://localhost:8000` |
+| 프런트엔드 개발 | `cd frontend; npm install; npm run dev` |
+| 프런트엔드 검사·빌드 | `cd frontend; npm run typecheck; npm run build` |
+| 로컬 DB | [DATABASE.md](./DATABASE.md)의 Docker 명령 |
+| 화면 확인 | Vite 주소 또는 배포 미리보기 주소 |
 | 헬스 체크 | `curl http://localhost:8000/health` |
 | 테스트 | `pytest` |
 
@@ -48,9 +52,12 @@ vibe-dev/
 │   ├── app/              FastAPI, 라우트, 입력 검증, 한도, safety.py
 │   └── agents/           에이전트 정의, 재판 진행, 판결 검증기
 │       └── prompts/      역할별 프롬프트 (변호인, 검사, 판사)
-├── web/                  정적 UI (index.html, app.js, style.css, samples.json)
+├── frontend/             React·TypeScript PWA (Vite)
+│   ├── src/              기능별 화면, API, 타입, 스타일
+│   └── public/           manifest, 아이콘, samples.json
 ├── tests/                pytest
 ├── infra/                azd 설정과 Bicep
+├── database/migrations/  Alembic 마이그레이션
 ├── docs/                 명세 문서
 ├── AGENTS.md, PRD.md, TRD.md
 ├── .env.example, .gitignore
@@ -59,10 +66,10 @@ vibe-dev/
 
 | 담당 | 폴더·파일 |
 | --- | --- |
-| 이채혁 (Frontend) | `web/` |
-| 김승운 (Backend) | `src/app/`, `src/agents/` |
-| 최성은 | `src/app/safety.py`, `web/samples.json`, `tests/`, `docs/DATABASE.md` |
-| 변동헌 (Infra) | `infra/`, `Dockerfile`, `azure.yaml`, 통합 테스트, 저장소 관리 |
+| 이채혁 (프런트엔드) | `frontend/` |
+| 김승운 (백엔드) | `src/app/`, `src/agents/` |
+| 최성은 | `src/app/safety.py`, `frontend/public/samples.json`, `tests/`, `database/migrations/`, `docs/DATABASE.md` |
+| 변동헌 (인프라) | `infra/`, `Dockerfile`, `azure.yaml`, 통합 테스트, 저장소 관리 |
 
 담당은 기존 README의 역할을 새 구조에 맞춰 제안한 것이다. 바꾸려면 팀이 합의해 이 표를 고친다.
 다른 사람의 폴더를 고칠 때는 먼저 담당자에게 알린다.
@@ -72,13 +79,13 @@ vibe-dev/
 | 약속 | 문서 |
 | --- | --- |
 | API 경로, 요청·응답, 이벤트, 오류 코드 | [API_SPEC.md](./API_SPEC.md) |
-| 판결문 JSON 형식과 길이 규칙 | [API_SPEC.md](./API_SPEC.md) 4.5절 |
-| 브라우저 저장 구조 | [DATABASE.md](./DATABASE.md) |
+| 판결문 JSON 형식과 길이 규칙 | [API_SPEC.md](./API_SPEC.md) 5.5절 |
+| 사용자 인증·기록 소유권·DB 스키마 | [DATABASE.md](./DATABASE.md), [API_SPEC.md](./API_SPEC.md) |
 | 기능 범위와 인수 조건 | [PRD.md](../PRD.md) |
 | 에이전트 역할과 금지 사항 | [TRD.md](../TRD.md) 3절 |
 
 **변경 절차**: ① 문서를 고친다 → ② 팀 채팅에 알린다 → ③ 영향받는 담당자가 확인한다 → ④ 코드를 고친다.
-UI와 서버는 이 문서의 규격만 보고 따로 개발한다. 서버가 완성되기 전에는 UI가 가짜 SSE 응답(`web/mock/`)으로 개발해도 된다. 가짜 응답은 API_SPEC 4.4절의 이벤트 순서를 따라야 하며, 배포 전에 삭제한다.
+UI와 서버는 이 문서의 규격만 보고 따로 개발한다. 서버가 완성되기 전에는 UI 테스트에서 가짜 SSE 응답을 사용할 수 있다. 가짜 응답은 API_SPEC 5.4절의 이벤트 순서를 따라야 하며, 배포 빌드에 포함하지 않는다.
 
 ## 4. 코딩 규칙
 
@@ -92,16 +99,21 @@ UI와 서버는 이 문서의 규격만 보고 따로 개발한다. 서버가 �
 ### Python
 
 - 함수의 인자와 반환값에 타입 힌트를 쓴다.
-- 네트워크·모델 호출은 `async`로 쓰고 **타임아웃**을 둔다 (API_SPEC 6절 값).
+- 네트워크·모델 호출은 `async`로 쓰고 **타임아웃**을 둔다 (PRD 8절, DATABASE.md 환경 변수).
 - 사용자 입력 검증은 Pydantic 모델로 한다.
 - 예외 메시지와 로그에 사건 내용을 넣지 않는다.
+- 모든 기록 쿼리는 인증된 OIDC 사용자의 서버 검증 ID로 범위를 제한한다. 클라이언트가 보낸 사용자 ID를 신뢰하지 않는다.
+- DB 연결은 TLS를 사용하고 비밀은 환경 변수/관리형 비밀로 주입한다. SQL은 바인딩 파라미터를 쓴다.
+- 스키마 변경은 Alembic 마이그레이션으로 관리하며, 배포 시 정해진 순서로 적용한다.
 - 파일 하나는 300줄 안팎으로 유지한다.
 
-### JavaScript / HTML / CSS
+### TypeScript / React / CSS
 
-- 프레임워크와 빌드 도구를 쓰지 않는다. ES 모듈을 쓴다.
-- **모델 출력과 저장소 값은 `textContent`로만 넣는다.** `innerHTML`, `insertAdjacentHTML`, `eval`을 쓰지 않는다.
+- UI는 React, TypeScript, Vite를 사용하고 PWA manifest·서비스 워커를 설정한다.
+- React의 일반 텍스트 렌더링을 사용한다. **`dangerouslySetInnerHTML`을 쓰지 않는다.**
+- 인증 토큰은 `localStorage`에 저장하지 않는다. OIDC 공급자의 안전한 세션 흐름을 따른다.
 - 스트림은 `fetch`와 `ReadableStream`으로 읽는다 (POST이므로 `EventSource`를 쓸 수 없다).
+- 서비스 워커는 앱 셸과 공개 파일만 캐시한다. `/api/**`, `/auth/**`와 사용자 기록은 캐시하지 않는다.
 - 모든 입력란에 `<label>`을 달고, 버튼은 키보드로 조작할 수 있게 한다.
 - 360px 너비를 기준으로 먼저 만들고 넓은 화면으로 확장한다.
 - 글자와 배경의 대비를 4.5:1 이상으로 한다.
@@ -120,7 +132,7 @@ UI와 서버는 이 문서의 규격만 보고 따로 개발한다. 서버가 �
 프롬프트 틀
 
 ```text
-읽을 문서: AGENTS.md, docs/API_SPEC.md 4절
+읽을 문서: AGENTS.md, docs/API_SPEC.md 5절
 할 일: (한 가지)
 만들 파일: (경로)
 하지 말 것: 명세에 없는 필드·기능 추가, 로그에 사건 내용 출력
@@ -143,14 +155,16 @@ UI와 서버는 이 문서의 규격만 보고 따로 개발한다. 서버가 �
 ## 7. 보안 체크리스트 (병합 전)
 
 - [ ] 토큰·키가 코드, 로그, 커밋에 없다
-- [ ] 사건 내용과 모델 출력을 로그에 남기지 않는다
-- [ ] 모델 출력과 저장소 값을 `textContent`로만 화면에 넣는다
+- [ ] 사건 내용, 발언, 판결, 인증 정보를 로그에 남기지 않는다
+- [ ] 모델 출력과 DB에서 읽은 값을 안전한 React 텍스트 렌더링으로 표시한다
+- [ ] 기록 API의 사용자 간 접근 차단 테스트가 있다
+- [ ] 사용자 ID는 검증된 인증 정보에서만 가져온다
 - [ ] Copilot 에이전트에 `calc_deadline` 외 도구를 승인하지 않는다 (`approve_all` 금지)
 - [ ] 사용자 입력은 `<case>` 태그로 감싸고 지시로 취급하지 않는다
 - [ ] 모델 호출에 타임아웃이 있다
 - [ ] 한도와 입력 길이 검증이 동작한다
 
-## 8. 완료의 기준 (Definition of Done)
+## 8. 완료 기준
 
 기능 하나가 끝났다고 말하려면 다음을 모두 만족해야 한다.
 
@@ -160,10 +174,10 @@ UI와 서버는 이 문서의 규격만 보고 따로 개발한다. 서버가 �
 4. 7절 체크리스트를 통과한다.
 5. 배포 URL에서도 동작한다 (배포 담당이 확인).
 
-## 9. 일정과 우선순위
+## 9. 작업 우선순위
 
-PRD 10절의 일정을 따른다. 15:00 1차 제출, 16:30 최종 제출이다.
-시간이 부족하면 P1을 만들지 않고, P0 중에서는 기록 화면(F8)을 단순화한다. **끝까지 동작하는 것이 기능을 늘리는 것보다 우선이다.**
+PRD 10절의 개발 순서와 우선순위를 따른다. P0을 완료하기 전에는 P1을 시작하지 않는다.
+기록 화면을 단순화하더라도 회원 인증, 사용자 간 데이터 격리, 기록 저장·삭제는 생략하지 않는다. **끝까지 동작하는 것이 기능을 늘리는 것보다 우선이다.**
 
 ## 10. 문제가 생겼을 때
 
