@@ -19,9 +19,9 @@
 
 | 기준 (가중치) | 대응 |
 | --- | --- |
-| Copilot SDK + Agent Framework (25%) | `GitHubCopilotAgent` 3개, 발언을 이어받는 컨텍스트, 도구 호출, 스트리밍 |
+| Copilot SDK + Agent Framework (25%) | `GitHubCopilotAgent` 3개, 발언을 이어받는 컨텍스트, 제한된 도구 호출, 스트리밍 |
 | 생산성·문제 적합성 (18%) | 시작하지 못하는 문제, 이행률과 시작 시간 지표 |
-| Azure 통합 (18%) | Container Apps, Application Insights, 반복 가능한 `azd` 배포 |
+| Azure 통합 (18%) | Container Apps, Log Analytics, 반복 가능한 `azd` 배포, 비밀은 Container Apps 비밀로 주입 |
 | 기능 완성도 (16%) | 접수 → 공방 → 판결 → 수용 → 집행 전 과정 |
 | UX (12%) | 실시간 공방, 수용·기각 선택, 접근성, 반응형 |
 | 책임 있는 AI (6%) | AI 표시, 수용 후 저장, 인젝션 방어, 위기 신호 중단 |

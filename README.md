@@ -1,47 +1,53 @@
-# 🎨 [해커톤]
+# 미루기 재판소
 
-> **2026 바이브 코딩 해커톤 협업 저장소**
+> 2026 바이브 코딩 해커톤 팀 BAO의 협업 프로젝트
 
-## 📌 프로젝트 소개
-- **팀명:** BAO
-- **개발 기간:** 2026.11.05 ~ 2026.11.05
+미루는 이유를 AI 변호인과 검사의 공방으로 드러내고, 판사가 맞춤 처방을 제안하는 웹 앱입니다. 사용자는 판결을 수용한 경우에만 브라우저에 기록하고, 체크리스트와 타이머로 실행합니다.
 
----
+## 기술 스택
 
-## 👥 팀원 및 역할 분배 (Team Roles)
+| 영역 | 기술 |
+| --- | --- |
+| 서버·언어 | Python 3.12, FastAPI |
+| AI | GitHub Copilot SDK, Microsoft Agent Framework |
+| 화면 | 정적 HTML, CSS, JavaScript |
+| 스트리밍 | SSE |
+| 기록 | 브라우저 `localStorage` (서버 저장소·데이터베이스 없음) |
+| 배포 | Azure Container Apps, Docker, `azd` |
+| 테스트 | pytest |
 
-| 역할 (Role) | 담당자 (Name) | 주요 담당 업무 (Responsibilities) |
-| :--- | :---: | :--- |
-| **Frontend** | 이채혁 | • UI/UX 디자인 및 구현<br>• 컴포넌트 개발 및 상태 관리 |
-| **Backend** | 김승운 | • 서버 API 구축 및 비즈니스 로직 구현<br>• 인증 및 데이터 처리 |
-| **Database (DB)** | 최성은 | • 데이터베이스 스키마 설계<br>• 쿼리 작성 및 데이터 관리 |
-| **Deployment (Infra)** | 변동헌 | • 클라우드 서버 배포 및 환경 구축<br>• CI/CD 및 도커라이징<br>• GitHub 저장소 관리 및 전체 AI 디버깅·통합 테스트 |
-
----
-
-## 🛠️ 기술 스택 (Tech Stack)
-
-### Frontend
-- HTML / CSS / JavaScript
-
-### Backend
-- Spring Boot
-
-### Database
-- MySQL
-
-### Deployment & Infra
-- Azure, Docker
-
----
-
-## 📁 프로젝트 구조 (Directory Structure)
+## 프로젝트 구조
 
 ```text
 vibe-dev/
-├── frontend/        # 프론트엔드 소스 코드
-├── backend/         # 백엔드 소스 코드
-├── database/        # DB 스키마 및 마이그레이션 파일
-├── infra/           # 배포 및 도커 설정 파일
-├── docs/            # API 및 DB 저장 목록
-└── README.md
+├── src/app/                 # FastAPI, 입력 검증, 안전·요청 한도
+├── src/agents/              # 에이전트, 재판 진행, 판결 검증
+│   └── prompts/             # 역할별 프롬프트
+├── web/                     # 정적 UI와 예시 사건
+├── tests/                   # pytest 테스트
+├── infra/                   # Azure 배포 인프라
+├── docs/                    # API·저장·개발 문서
+├── PRD.md                   # 제품 요구사항과 인수 조건
+├── TRD.md                   # 기술 구조와 결정
+└── AGENTS.md                # AI 에이전트 작업 규칙
+```
+
+`backend/`, `frontend/`, `database/`는 이전 기술 계획에서 남은 폴더이며 현재 구현 위치가 아닙니다. 실제 구현 경로는 [TRD.md](./TRD.md)를 기준으로 합니다.
+
+## 시작하기
+
+개발 환경과 명령은 [개발 규칙](./docs/DEVELOPMENT_RULES.md)을 참고하세요. Python 의존성 파일과 앱 코드가 준비된 뒤 아래 명령으로 실행합니다.
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+uvicorn src.app.main:app --reload --port 8000
+```
+
+## 문서
+
+- [제품 요구사항 및 인수 조건](./PRD.md)
+- [기술 설계 및 배포](./TRD.md)
+- [아이디어 배경](./docs/IDEA.md)
+- [문서 색인과 변경 규칙](./docs/README.md)
