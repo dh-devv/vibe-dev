@@ -13,7 +13,7 @@
 | 화면 | React, TypeScript, CSS, Vite |
 | 앱 형태 | 설치 가능한 반응형 웹 앱(PWA) |
 | 스트리밍 | SSE |
-| 인증 | 관리형 OAuth/OIDC (공급자 선정 전) |
+| 인증 | Microsoft Entra External ID (OIDC) |
 | 데이터베이스 | Azure Database for PostgreSQL (로컬 개발 시 Docker PostgreSQL 가능) |
 | 배포 | Azure Container Apps, Azure Database for PostgreSQL, Docker, `azd` |
 | 테스트 | pytest, Vitest |
@@ -40,17 +40,17 @@ vibe-dev/
 
 ## 시작하기
 
-개발 환경과 명령은 [개발 규칙](./docs/DEVELOPMENT_RULES.md)을 참고하세요. Python 의존성 파일과 앱 코드가 준비된 뒤 실행합니다. 실행 전 PostgreSQL과 OIDC 설정을 `.env`에 구성해야 합니다.
+개발 환경과 명령은 [개발 규칙](./docs/DEVELOPMENT_RULES.md)을 참고하세요. 실행 전 PostgreSQL, OIDC, 세션 설정을 `.env`에 구성해야 합니다. OIDC 앱의 redirect URI는 `{PUBLIC_BASE_URL}/auth/callback`으로 등록합니다. `SESSION_SECRET_KEY`는 `python -c "import secrets; print(secrets.token_urlsafe(48))"`로 만들고, 운영 비밀은 비밀 저장소에 둡니다.
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 pip install -r requirements.txt
-uvicorn src.app.main:app --reload --port 8000
+uvicorn src.app.main:app --reload --no-access-log --port 8000
 ```
 
-`GET /health`에서 서버 응답을 확인할 수 있습니다. `.env`는 로컬 설정 전용이며 커밋하지 마세요. 로컬 PostgreSQL은 `docker compose up -d postgres`로 실행합니다([데이터 명세](./docs/DATABASE.md)).
+로컬 PostgreSQL은 `docker compose up -d postgres`로 실행하고, 스키마는 `alembic upgrade head`로 적용합니다. `GET /health`에서 서버 응답을 확인할 수 있습니다. `.env`는 로컬 설정 전용이며 커밋하지 마세요([데이터 명세](./docs/DATABASE.md)).
 
 ## 문서
 

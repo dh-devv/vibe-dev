@@ -35,7 +35,7 @@
 | DELETE | `/api/account` | 앱 계정과 해당 기록 삭제 | P0 |
 | POST | `/api/appeal` | 항소 (SSE 스트림) | P1 (구현 전에는 404) |
 
-PWA 정적 UI는 `/`에서 제공한다 (`frontend/dist/index.html`). API·인증 경로가 아닌 클라이언트 화면 경로는 SPA 진입점으로 돌려보낸다. 예시 사건은 `/samples.json`으로 제공하며 소스 파일은 `frontend/public/samples.json`이다. 가입·로그인은 관리형 OIDC 제공자가 처리하며 공급자는 구현 전에 확정한다. 인증 제공자에서 자체 가입을 허용한다.
+PWA 정적 UI는 `/`에서 제공한다 (`frontend/dist/index.html`). API·인증 경로가 아닌 클라이언트 화면 경로는 SPA 진입점으로 돌려보낸다. 예시 사건은 `/samples.json`으로 제공하며 소스 파일은 `frontend/public/samples.json`이다. 가입·로그인은 Microsoft Entra External ID가 처리한다. 인증 제공자에서 자체 가입을 허용한다.
 
 모든 상태 변경 요청에는 CSRF 방어를 적용한다. 인증 누락·만료는 `401`, 잘못된 CSRF 검증은 `403`으로 응답한다. 다른 사용자의 기록 ID를 지정한 경우 존재 여부를 감추기 위해 `404`를 반환한다.
 

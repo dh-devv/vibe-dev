@@ -9,7 +9,7 @@
 | 에이전트 | Microsoft Agent Framework (`agent-framework-github-copilot`) | `GitHubCopilotAgent`. 첫 호출 시점에 버전과 사용법을 확인한다 |
 | 서버 | FastAPI, SSE(서버 전송 이벤트) | |
 | UI | React, TypeScript, Vite, PWA | Node.js LTS로 빌드하고 FastAPI가 정적 산출물을 제공 |
-| 인증 | 관리형 OAuth/OIDC | 공급자 미정. 서버가 ID 토큰을 검증하고 보안 세션 쿠키를 발급한다. 앱은 비밀번호를 보관하지 않는다 |
+| 인증 | Microsoft Entra External ID (OIDC) | 서버가 ID 토큰을 검증하고 보안 세션 쿠키를 발급한다. 앱은 비밀번호를 보관하지 않는다 |
 | 데이터베이스 | Azure Database for PostgreSQL | 계정 식별자와 수용한 사용자별 재판 기록 |
 | 스키마 마이그레이션 | Alembic | 버전 관리된 DB 스키마 변경 |
 | 배포 | Azure Container Apps (Consumption) | 기본 도메인 `*.azurecontainerapps.io` |
