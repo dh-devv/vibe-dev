@@ -111,7 +111,7 @@ export function CaseForm({ onSubmit }: Props) {
           <input id="c-deadline" type="date" className="px-input" value={deadline} min={today(0)} max={today(365)} onChange={(e) => setDeadline(e.target.value)} aria-describedby="e-deadline" />
           <p id="e-deadline" className="err" role="alert">{errors.deadline}</p>
         </div>
-        <p className="note small">접수하면 입력한 내용이 AI 제공자에게 전송됩니다. 판결을 수용하면 사건과 판결이 내 계정에 저장되고, 기각하면 저장하지 않습니다.</p>
+        <p className="note small">접수하면 입력한 내용이 AI 제공자에게 전송됩니다. 판결을 수용하면 이 화면의 기록에 담기고, 기각하면 담지 않습니다. 새로고침하면 기록은 사라집니다.</p>
         <button type="submit" className="px-btn primary big">⚖ 재판 시작</button>
       </form>
       <Disclaimer />

@@ -10,7 +10,6 @@ interface Props {
   onChecks: (id: string, checks: boolean[][]) => void;
   onDelete: (id: string) => void;
   onDeleteAll: () => void;
-  onDeleteAccount: () => void;
 }
 
 function duration(ms: number): string {
@@ -20,8 +19,8 @@ function duration(ms: number): string {
   return min < 60 ? `${min}분 ${sec % 60}초` : `${Math.floor(min / 60)}시간 ${min % 60}분`;
 }
 
-export function RecordsScreen({ records, selectedId, onSelect, onChecks, onDelete, onDeleteAll, onDeleteAccount }: Props) {
-  const [confirming, setConfirming] = useState<null | "all" | "account" | string>(null);
+export function RecordsScreen({ records, selectedId, onSelect, onChecks, onDelete, onDeleteAll }: Props) {
+  const [confirming, setConfirming] = useState<null | "all" | string>(null);
   const selected = records.find((r) => r.id === selectedId) ?? null;
 
   const done = records.filter((r) => r.completedAt).length;
@@ -32,12 +31,10 @@ export function RecordsScreen({ records, selectedId, onSelect, onChecks, onDelet
   const rate = records.length ? `${Math.round((done / records.length) * 100)}%` : "기록 없음";
   const start = gaps.length ? duration(gaps.reduce((a, b) => a + b, 0) / gaps.length) : "기록 없음";
 
-  const confirmLabel =
-    confirming === "all" ? "기록을 모두 지울까요?" : confirming === "account" ? "계정과 모든 기록을 지울까요? 로그인 제공자의 계정은 지워지지 않습니다." : "이 기록을 지울까요?";
+  const confirmLabel = confirming === "all" ? "기록을 모두 지울까요?" : "이 기록을 지울까요?";
 
   const doConfirm = () => {
     if (confirming === "all") onDeleteAll();
-    else if (confirming === "account") onDeleteAccount();
     else if (confirming) onDelete(confirming);
     setConfirming(null);
   };
@@ -73,9 +70,8 @@ export function RecordsScreen({ records, selectedId, onSelect, onChecks, onDelet
             ))}
           </ul>
         )}
-        <div className="row spread">
+        <div className="row">
           <button className="px-btn small danger" disabled={records.length === 0} onClick={() => setConfirming("all")}>기록 모두 지우기</button>
-          <button className="px-btn small danger" onClick={() => setConfirming("account")}>계정 삭제</button>
         </div>
       </section>
 
