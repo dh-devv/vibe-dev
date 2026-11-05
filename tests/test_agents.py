@@ -83,3 +83,32 @@ def test_bounded_stops_slow_stream() -> None:
 
     with pytest.raises(TimeoutError):
         asyncio.run(consume())
+
+
+def test_each_stage_prompt_carries_a_strategy_and_streams_in_order() -> None:
+    import json
+
+    from src.agents.trial import STRATEGIES, run_trial
+
+    prompts: list[tuple[str, str]] = []
+
+    class Recorder:
+        async def run(self, role, prompt):
+            prompts.append((role, prompt))
+            if role == "judge":
+                yield json.dumps(VALID_VERDICT, ensure_ascii=False)
+            else:
+                yield "발언 "
+                yield "내용"
+
+    async def collect():
+        return [e async for e in run_trial(Recorder(), "보고서를 못 쓰고 있다", None, "2026-11-05T00:00:00Z", 5, 20)]
+
+    events = asyncio.run(collect())
+    names = [name for name, _ in events]
+
+    assert names.count("statement") == 6 and names.count("statement_done") == 3
+    assert names[-2:] == ["verdict", "done"]
+    assert [r for r, _ in prompts] == ["defense", "prosecution", "defense", "judge"]
+    for role, prompt in prompts:
+        assert any(s in prompt for s in STRATEGIES[role])
