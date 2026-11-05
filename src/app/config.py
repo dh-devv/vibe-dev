@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     user_per_minute: int = Field(default=3, gt=0)
     user_per_day: int = Field(default=20, gt=0)
     global_per_day: int = Field(default=300, gt=0)
+    copilot_model: str | None = None
+    dev_auth_enabled: bool = False
+    trusted_proxy_hops: int = Field(default=0, ge=0)
     model_timeout_seconds: int = Field(default=30, gt=0)
     trial_timeout_seconds: int = Field(default=90, gt=0)
 
