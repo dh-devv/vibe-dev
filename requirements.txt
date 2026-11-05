@@ -8,8 +8,8 @@ github-copilot-sdk==1.0.28
 agent-framework-github-copilot==2.1.1
 
 # 입력 검증 & 유틸리티
-pydantic==2.5.0
-pydantic-settings==2.1.0
+pydantic==2.11.7
+pydantic-settings==2.10.1
 python-dotenv==1.0.0
 
 # 로깅

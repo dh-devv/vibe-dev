@@ -1,12 +1,7 @@
-<<<<<<< HEAD
-# 데이터 저장
-
-현재 제품 요구사항은 데이터베이스를 사용하지 않습니다. 이 폴더의 MySQL 안내는 이전 구현 계획이며 현재 백엔드 설정에 적용하지 않습니다.
-
-수용한 판결은 브라우저 `localStorage`에만 저장합니다. 저장 구조와 개인정보 처리 기준은 [데이터 명세](../docs/DATABASE.md)를 참고하세요.
-=======
 # 데이터베이스
 
 회원별 재판 기록을 저장하기 위해 Azure Database for PostgreSQL을 사용합니다.
 스키마, 소유권, 보존·삭제 규칙은 [데이터 명세](../docs/DATABASE.md)를 따릅니다.
->>>>>>> bbf0d91d15091141a1d6bb773129a4f9636b2522
+
+- [schema.sql](./schema.sql)은 초기 스키마 초안입니다. Alembic 마이그레이션(`migrations/`)을 만들면 그 기준으로 옮깁니다.
+- 로컬 PostgreSQL은 저장소 루트의 `compose.yaml`로 실행합니다. 명령은 [데이터 명세](../docs/DATABASE.md) 1절을 참고하세요.

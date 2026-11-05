@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-# 데이터 명세
-## 1. 저장 위치 한눈에 보기
-=======
 # 인증·데이터 명세
 
 ## 1. 결정
 
-이 앱은 여러 사용자가 가입해 각자 재판을 받고 자신의 기록을 다시 보는 서비스다. 따라서 브라우저에만 저장하지 않고 **Azure Database for PostgreSQL**에 사용자별 기록을 저장한다. 스키마는 Alembic 마이그레이션으로 버전 관리한다.
->>>>>>> bbf0d91d15091141a1d6bb773129a4f9636b2522
-
+이 앱은 여러 사용자가 가입해 각자 재판을 받고 자신의 기록을 다시 보는 서비스다. 따라서 브라우저에만 저장하지 않고 **Azure Database for PostgreSQL**에 사용자별 기록을 저장한다. 스키마는 Alembic 마이그레이션으로 버전 관리한다. 마이그레이션을 만들기 전의 초안은 [database/schema.sql](../database/schema.sql)이다.
 Azure Database for PostgreSQL은 Dockerfile로 만드는 이미지가 아니라 Azure가 운영하는 관리형 서비스다. 개발·테스트용 PostgreSQL은 Docker 컨테이너로 실행할 수 있지만, 배포 환경의 DB로 컨테이너를 쓰지는 않는다. 앱 `Dockerfile`은 FastAPI와 프런트엔드 빌드 결과를 이미지로 만들고, 로컬 DB 컨테이너는 Docker Compose로 별도 관리한다.
 
 ### 로컬 개발용 PostgreSQL
