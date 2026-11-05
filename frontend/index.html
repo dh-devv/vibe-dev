@@ -6,137 +6,200 @@
 <title>미루기 재판소</title>
 <style>
   :root {
-    --bg: #f6f4ef;
-    --card: #ffffff;
-    --text: #1d1d1f;
-    --sub: #55555c;
-    --line: #cfcbc0;
-    --accent: #1f3a6e;
-    --accent-text: #ffffff;
-    --defense: #14532d;
-    --prosecution: #8a1c1c;
-    --warn-bg: #fff4e0;
-    --warn-line: #8a5a00;
-    --danger-bg: #fdecec;
-    --ok: #14532d;
+    --bg1: #12142b;
+    --bg2: #241a3d;
+    --card: #1d2142;
+    --card-line: #3a3f6b;
+    --text: #f4f0e6;
+    --sub: #b8bcd9;
+    --gold: #f2c14e;
+    --gold-dark: #1a1530;
+    --defense: #6ee7c8;
+    --prosecution: #ff9a9a;
+    --paper: #fbf3dc;
+    --paper-text: #2a2118;
+    --paper-sub: #5e5140;
+    --paper-line: #cdb98a;
+    --danger-bg: #3b1d2b;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
-    background: var(--bg);
+    background: radial-gradient(circle at 15% -10%, #3b2f6e 0, transparent 45%), linear-gradient(160deg, var(--bg1), var(--bg2)) fixed;
     color: var(--text);
-    line-height: 1.6;
+    line-height: 1.65;
   }
-  header, main, footer { max-width: 760px; margin: 0 auto; padding: 0 16px; }
-  header { padding-top: 20px; }
-  h1 { margin: 0; font-size: 1.6rem; }
-  h2 { font-size: 1.15rem; margin: 0 0 10px; }
-  h3 { font-size: 1rem; margin: 14px 0 6px; }
-  .tagline { margin: 4px 0 12px; color: var(--sub); }
+  header, main, footer { max-width: 780px; margin: 0 auto; padding: 0 16px; }
+  .hero { text-align: center; padding: 32px 0 8px; }
+  .gavel { font-size: 3.2rem; line-height: 1; display: inline-block; transform-origin: 80% 80%; animation: bang 2.6s ease-in-out infinite; }
+  h1 {
+    margin: 8px 0 0;
+    font-family: "Batang", "Nanum Myeongjo", "Noto Serif KR", Georgia, serif;
+    font-size: 2.2rem;
+    letter-spacing: 0.04em;
+    color: var(--gold);
+    text-shadow: 0 2px 18px rgba(242, 193, 78, 0.35);
+  }
+  h2 { font-size: 1.2rem; margin: 0 0 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  h3 { font-size: 1rem; margin: 16px 0 6px; }
+  .tagline { margin: 6px auto 16px; max-width: 520px; color: var(--sub); font-size: 1.02rem; }
+  .cast { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 0 0 16px; padding: 0; list-style: none; }
+  .cast li { background: rgba(255, 255, 255, 0.07); border: 1px solid var(--card-line); border-radius: 999px; padding: 4px 14px; font-size: 0.9rem; }
   .notice {
-    margin: 0 0 12px;
-    padding: 8px 12px;
-    background: var(--warn-bg);
-    border-left: 4px solid var(--warn-line);
-    font-size: 0.9rem;
+    margin: 0 0 16px;
+    padding: 8px 14px;
+    background: rgba(242, 193, 78, 0.1);
+    border: 1px solid rgba(242, 193, 78, 0.5);
+    border-radius: 10px;
+    font-size: 0.88rem;
+    color: var(--text);
   }
   .card {
     background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 16px;
-    margin: 0 0 16px;
+    border: 1px solid var(--card-line);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 0 0 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    animation: rise 0.45s ease both;
   }
-  label { display: block; font-weight: 700; margin: 0 0 4px; }
+  .step {
+    display: inline-grid; place-items: center;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--gold); color: var(--gold-dark);
+    font-size: 0.95rem; font-weight: 800;
+  }
+  label { display: block; font-weight: 700; margin: 0 0 6px; }
   textarea, input[type="date"] {
     width: 100%;
     font: inherit;
-    color: var(--text);
-    padding: 8px;
-    border: 1px solid #77736a;
-    border-radius: 6px;
-    background: #fff;
+    color: #1d1d1f;
+    padding: 12px;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    background: #f7f4ec;
   }
-  textarea { min-height: 120px; resize: vertical; }
-  .field { margin: 0 0 12px; }
-  .hint { font-size: 0.85rem; color: var(--sub); margin: 4px 0 0; }
+  textarea:focus, input[type="date"]:focus { border-color: var(--gold); outline: none; }
+  textarea { min-height: 130px; resize: vertical; }
+  .field { margin: 0 0 14px; }
+  .hint { font-size: 0.85rem; color: var(--sub); margin: 6px 0 0; }
   .error-text { color: var(--prosecution); font-weight: 700; }
   button {
     font: inherit;
-    padding: 10px 14px;
-    min-height: 44px;
-    border-radius: 6px;
-    border: 1px solid var(--accent);
-    background: var(--card);
-    color: var(--accent);
-    cursor: pointer;
-  }
-  button.primary { background: var(--accent); color: var(--accent-text); }
-  button:disabled { opacity: 0.55; cursor: not-allowed; }
-  :focus-visible { outline: 3px solid #b45f06; outline-offset: 2px; }
-  .row { display: flex; flex-wrap: wrap; gap: 8px; }
-  .stage {
     font-weight: 700;
-    padding: 8px 12px;
-    background: #e8edf7;
-    border-radius: 6px;
-    margin: 0 0 12px;
+    padding: 10px 18px;
+    min-height: 46px;
+    border-radius: 999px;
+    border: 2px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
   }
-  .statement {
-    border-left: 5px solid var(--defense);
-    padding: 8px 12px;
-    margin: 0 0 12px;
-    background: #fafafa;
+  button:hover:not(:disabled) { background: rgba(242, 193, 78, 0.15); transform: translateY(-1px); }
+  button.primary { background: var(--gold); color: var(--gold-dark); box-shadow: 0 4px 16px rgba(242, 193, 78, 0.35); }
+  button.primary:hover:not(:disabled) { background: #ffd56e; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  :focus-visible { outline: 3px solid #ffffff; outline-offset: 3px; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; }
+  #samples button { border-color: var(--card-line); color: var(--text); background: rgba(255, 255, 255, 0.06); }
+  #samples button:hover:not(:disabled) { border-color: var(--gold); }
+  .stage {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700;
+    padding: 10px 14px;
+    background: rgba(242, 193, 78, 0.12);
+    border-radius: 12px;
+    margin: 0 0 14px;
   }
-  .statement.prosecution { border-left-color: var(--prosecution); }
+  .stage::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); flex: none; animation: pulse 1.1s ease-in-out infinite; }
+  .statement { display: flex; gap: 10px; margin: 0 0 14px; animation: rise 0.35s ease both; }
+  .statement .avatar {
+    flex: none; width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 1.4rem;
+    background: rgba(110, 231, 200, 0.15); border: 2px solid var(--defense);
+  }
+  .statement.prosecution { flex-direction: row-reverse; }
+  .statement.prosecution .avatar { background: rgba(255, 154, 154, 0.15); border-color: var(--prosecution); }
+  .statement .bubble {
+    flex: 1; min-width: 0; padding: 10px 14px; border-radius: 4px 16px 16px 16px;
+    background: rgba(110, 231, 200, 0.1); border: 1px solid rgba(110, 231, 200, 0.4);
+  }
+  .statement.prosecution .bubble { border-radius: 16px 4px 16px 16px; background: rgba(255, 154, 154, 0.1); border-color: rgba(255, 154, 154, 0.45); }
   .statement .who { font-weight: 700; margin: 0 0 4px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .statement.defense .who .name { color: var(--defense); }
   .statement.prosecution .who .name { color: var(--prosecution); }
   .statement .body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
   .badge {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    padding: 1px 8px;
-    border-radius: 10px;
-    border: 1px solid var(--sub);
+    padding: 1px 9px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
     color: var(--sub);
-    background: #fff;
+    background: transparent;
+    white-space: nowrap;
   }
-  .cause { display: inline-block; font-weight: 700; padding: 2px 10px; border-radius: 10px; background: #e8edf7; color: var(--accent); }
-  .presc { border: 1px solid var(--line); border-radius: 6px; padding: 12px; margin: 0 0 12px; }
+  #verdict { background: var(--paper); color: var(--paper-text); border: 3px double var(--paper-line); }
+  #verdict h2 { font-family: "Batang", "Nanum Myeongjo", "Noto Serif KR", Georgia, serif; font-size: 1.4rem; }
+  #verdict .hint, #verdict .badge { color: var(--paper-sub); }
+  #verdict button { color: #5b3b00; border-color: #8a5a00; }
+  #verdict button:hover:not(:disabled) { background: rgba(138, 90, 0, 0.12); }
+  #verdict button.primary { background: #1f3a6e; color: #ffffff; border-color: #1f3a6e; box-shadow: none; }
+  #verdict button.primary:hover:not(:disabled) { background: #2b4d8f; }
+  #verdict .stamp { transform: rotate(-3deg); }
+  .cause { display: inline-block; font-weight: 800; padding: 2px 14px; border-radius: 999px; background: #1f3a6e; color: #ffffff; }
+  .presc { border-radius: 12px; padding: 14px; margin: 0 0 12px; }
+  #verdict .presc { background: rgba(255, 255, 255, 0.6); border: 1px solid var(--paper-line); }
+  #exec .presc { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--card-line); }
+  .presc h3 { margin-top: 0; }
+  .presc ol { margin: 6px 0; padding-left: 22px; }
   .presc ul { list-style: none; padding: 0; margin: 8px 0; }
   .presc li { padding: 4px 0; }
-  .presc li label { display: flex; gap: 8px; align-items: flex-start; font-weight: 400; margin: 0; min-height: 32px; }
-  .presc li input[type="checkbox"] { width: 22px; height: 22px; flex: none; margin-top: 3px; }
-  .timer { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; margin: 0 8px 0 0; align-self: center; }
+  .presc li label { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; margin: 0; min-height: 34px; cursor: pointer; }
+  .presc li input[type="checkbox"] { width: 24px; height: 24px; flex: none; margin-top: 2px; accent-color: var(--gold); }
+  .timer { font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; margin: 0 8px 0 0; align-self: center; color: var(--gold); }
   .crisis { background: var(--danger-bg); border: 2px solid var(--prosecution); }
   .crisis ul { margin: 8px 0 0; padding-left: 20px; }
-  .stats { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 0 0 12px; }
-  .stat { background: #f2f0ea; border-radius: 6px; padding: 8px 12px; }
-  .stat .v { font-size: 1.3rem; font-weight: 700; }
+  .stats { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 0 0 14px; }
+  .stat { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--card-line); border-radius: 12px; padding: 10px 14px; }
+  .stat .v { font-size: 1.5rem; font-weight: 800; color: var(--gold); }
   .stat .k { color: var(--sub); font-size: 0.85rem; }
-  .records { list-style: none; padding: 0; margin: 0 0 12px; }
-  .records li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 6px 0; border-top: 1px solid var(--line); }
+  .records { list-style: none; padding: 0; margin: 0 0 14px; }
+  .records li { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--card-line); }
   .records .t { overflow-wrap: anywhere; flex: 1 1 200px; }
-  .done-msg { color: var(--ok); font-weight: 700; }
+  .done-msg { color: var(--defense); font-weight: 800; }
   [hidden] { display: none !important; }
-  footer { padding-bottom: 24px; color: var(--sub); font-size: 0.85rem; }
+  footer { padding-bottom: 32px; color: var(--sub); font-size: 0.85rem; text-align: center; }
+  @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @keyframes pulse { 50% { opacity: 0.25; transform: scale(0.7); } }
+  @keyframes bang { 0%, 70%, 100% { transform: rotate(0); } 80% { transform: rotate(-28deg); } 90% { transform: rotate(8deg); } }
   @media (min-width: 560px) {
     .stats { grid-template-columns: repeat(3, 1fr); }
+    h1 { font-size: 2.8rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
   }
 </style>
 </head>
 <body>
-<header>
+<header class="hero">
+  <span class="gavel" aria-hidden="true">⚖️</span>
   <h1>미루기 재판소</h1>
   <p class="tagline">미루는 일을 법정에 세우세요. AI 변호인과 검사가 다투고, 판사가 처방을 판결합니다.</p>
+  <ul class="cast" aria-label="등장인물">
+    <li><span aria-hidden="true">🛡️</span> 변호인: 미루는 마음</li>
+    <li><span aria-hidden="true">⚔️</span> 검사: 미루는 비용</li>
+    <li><span aria-hidden="true">👩‍⚖️</span> 판사: 맞춤 처방</li>
+  </ul>
   <p class="notice" role="note">이 서비스는 의료·상담 서비스가 아니며, 판결은 AI가 생성한 참고 의견입니다.</p>
 </header>
 
 <main>
   <section id="intake" class="card" aria-labelledby="intake-title">
-    <h2 id="intake-title">1. 사건 접수</h2>
+    <h2 id="intake-title"><span class="step" aria-hidden="true">1</span> 사건 접수</h2>
     <form id="case-form" novalidate>
       <div class="field">
         <label for="case-text">사건 내용 (필수)</label>
@@ -172,13 +235,13 @@
   </section>
 
   <section id="trial" class="card" aria-labelledby="trial-title" hidden>
-    <h2 id="trial-title">2. 공방</h2>
+    <h2 id="trial-title"><span class="step" aria-hidden="true">2</span> 공방</h2>
     <p id="stage" class="stage" role="status" aria-live="polite"></p>
     <div id="statements"></div>
   </section>
 
   <section id="verdict" class="card" aria-labelledby="verdict-title" hidden>
-    <h2 id="verdict-title">3. 판결 <span class="badge">AI 생성</span></h2>
+    <h2 id="verdict-title"><span aria-hidden="true">📜</span> 판결문 <span class="badge stamp">AI 생성</span></h2>
     <p>판결의 원인은 <span class="cause" id="v-cause"></span> <span class="hint">(추정)</span></p>
     <h3>판결 요지</h3>
     <p id="v-summary"></p>
@@ -193,7 +256,7 @@
   </section>
 
   <section id="exec" class="card" aria-labelledby="exec-title" hidden>
-    <h2 id="exec-title">4. 집행</h2>
+    <h2 id="exec-title"><span class="step" aria-hidden="true">4</span> 집행</h2>
     <p id="save-warn" class="error-text" role="alert" hidden>기록을 저장하지 못했습니다. 집행은 계속할 수 있습니다.</p>
     <div id="exec-list"></div>
     <p id="exec-done" class="done-msg" role="status" hidden>모든 단계를 마쳤습니다. 집행 완료로 기록했습니다.</p>
@@ -444,9 +507,13 @@ async function handleHttpError(response) {
 
 function statementNode(n, role) {
   const box = el("div", undefined, `statement ${role}`);
+  const avatar = el("span", role === "defense" ? "🛡️" : "⚔️", "avatar");
+  avatar.setAttribute("aria-hidden", "true");
+  const bubble = el("div", undefined, "bubble");
   const who = el("p", undefined, "who");
   who.append(el("span", `${n}번 발언 · ${ROLE_NAMES[role]}`, "name"), aiBadge());
-  box.append(who, el("p", "", "body"));
+  bubble.append(who, el("p", "", "body"));
+  box.append(avatar, bubble);
   return box;
 }
 
