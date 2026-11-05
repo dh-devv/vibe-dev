@@ -1,5 +1,3 @@
-# Infra
+# 배포 인프라
 
-배포 및 Docker 설정 파일을 관리하는 폴더입니다.
-
-기술 스택: Azure, Docker
+Azure Container Apps 배포 설정을 관리합니다. 기술 선택과 리소스 범위는 [TRD.md](../TRD.md)를 기준으로 하며, `azd`와 Docker를 사용합니다.
