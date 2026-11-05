@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>미루기 재판소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
 <style>
   :root {
     --bg1: #12142b;
@@ -25,19 +28,42 @@
   * { box-sizing: border-box; }
   body {
     margin: 0;
-    font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
-    background: radial-gradient(circle at 15% -10%, #3b2f6e 0, transparent 45%), linear-gradient(160deg, var(--bg1), var(--bg2)) fixed;
+    font-family: "Noto Sans KR", "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(242, 193, 78, 0.28), transparent 70%),
+      radial-gradient(circle at 10% 30%, rgba(120, 90, 220, 0.35), transparent 45%),
+      radial-gradient(circle at 92% 70%, rgba(220, 90, 140, 0.2), transparent 40%),
+      linear-gradient(170deg, #0d0f26, #1c1238 60%, #140c26) fixed;
     color: var(--text);
-    line-height: 1.65;
+    line-height: 1.7;
+    min-height: 100vh;
+    position: relative;
+  }
+  /* 법원 기둥 실루엣과 별가루 배경 */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='420' viewBox='0 0 900 420'><g fill='%23f2c14e' fill-opacity='0.10'><path d='M60 40 L450 0 L840 40 Z'/><rect x='60' y='48' width='780' height='18'/><rect x='110' y='80' width='46' height='290'/><rect x='250' y='80' width='46' height='290'/><rect x='390' y='80' width='46' height='290'/><rect x='530' y='80' width='46' height='290'/><rect x='670' y='80' width='46' height='290'/><rect x='740' y='80' width='46' height='290'/><rect x='60' y='370' width='780' height='22'/><rect x='30' y='392' width='840' height='28'/></g></svg>") center bottom / min(900px, 140vw) no-repeat,
+      radial-gradient(1.5px 1.5px at 20px 30px, rgba(255, 255, 255, 0.55), transparent),
+      radial-gradient(1px 1px at 90px 120px, rgba(255, 255, 255, 0.4), transparent),
+      radial-gradient(1.5px 1.5px at 160px 60px, rgba(242, 193, 78, 0.6), transparent);
+    background-size: min(900px, 140vw) auto, 190px 160px, 190px 160px, 190px 160px;
+    background-repeat: no-repeat, repeat, repeat, repeat;
+    background-position: center bottom, 0 0, 0 0, 0 0;
   }
   header, main, footer { max-width: 780px; margin: 0 auto; padding: 0 16px; }
   .hero { text-align: center; padding: 32px 0 8px; }
   .gavel { font-size: 3.2rem; line-height: 1; display: inline-block; transform-origin: 80% 80%; animation: bang 2.6s ease-in-out infinite; }
   h1 {
     margin: 8px 0 0;
-    font-family: "Batang", "Nanum Myeongjo", "Noto Serif KR", Georgia, serif;
-    font-size: 2.2rem;
-    letter-spacing: 0.04em;
+    font-family: "Gowun Batang", "Batang", "Noto Serif KR", Georgia, serif;
+    font-weight: 700;
+    font-size: 2.4rem;
+    letter-spacing: 0.06em;
     color: var(--gold);
     text-shadow: 0 2px 18px rgba(242, 193, 78, 0.35);
   }
@@ -71,17 +97,38 @@
     font-size: 0.95rem; font-weight: 800;
   }
   label { display: block; font-weight: 700; margin: 0 0 6px; }
+  .field > label { color: var(--gold); letter-spacing: 0.02em; }
+  .field > label .opt { color: var(--sub); font-weight: 400; font-size: 0.85rem; }
   textarea, input[type="date"] {
     width: 100%;
     font: inherit;
-    color: #1d1d1f;
-    padding: 12px;
-    border: 2px solid transparent;
-    border-radius: 12px;
-    background: #f7f4ec;
+    font-size: 1.05rem;
+    color: var(--text);
+    padding: 14px 16px;
+    border: 1.5px solid rgba(242, 193, 78, 0.35);
+    border-radius: 14px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.35);
+    color-scheme: dark;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   }
-  textarea:focus, input[type="date"]:focus { border-color: var(--gold); outline: none; }
-  textarea { min-height: 130px; resize: vertical; }
+  textarea::placeholder { color: #9aa0c4; }
+  textarea:hover, input[type="date"]:hover { border-color: rgba(242, 193, 78, 0.7); }
+  textarea:focus, input[type="date"]:focus {
+    border-color: var(--gold);
+    outline: none;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 4px rgba(242, 193, 78, 0.22), inset 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+  textarea { min-height: 150px; resize: vertical; line-height: 1.7; }
+  input[type="date"] { max-width: 260px; font-weight: 500; cursor: pointer; }
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    filter: invert(78%) sepia(60%) saturate(500%) hue-rotate(2deg);
+  }
+  #case-count { display: inline-block; margin-left: 4px; padding: 0 10px; border-radius: 999px; background: rgba(242, 193, 78, 0.18); color: var(--gold); font-weight: 700; }
   .field { margin: 0 0 14px; }
   .hint { font-size: 0.85rem; color: var(--sub); margin: 6px 0 0; }
   .error-text { color: var(--prosecution); font-weight: 700; }
@@ -142,7 +189,8 @@
     white-space: nowrap;
   }
   #verdict { background: var(--paper); color: var(--paper-text); border: 3px double var(--paper-line); }
-  #verdict h2 { font-family: "Batang", "Nanum Myeongjo", "Noto Serif KR", Georgia, serif; font-size: 1.4rem; }
+  #verdict h2 { font-family: "Gowun Batang", "Batang", "Noto Serif KR", Georgia, serif; font-size: 1.5rem; }
+  #verdict p, #verdict li { font-family: "Gowun Batang", "Noto Sans KR", serif; font-size: 1.05rem; }
   #verdict .hint, #verdict .badge { color: var(--paper-sub); }
   #verdict button { color: #5b3b00; border-color: #8a5a00; }
   #verdict button:hover:not(:disabled) { background: rgba(138, 90, 0, 0.12); }
@@ -202,13 +250,13 @@
     <h2 id="intake-title"><span class="step" aria-hidden="true">1</span> 사건 접수</h2>
     <form id="case-form" novalidate>
       <div class="field">
-        <label for="case-text">사건 내용 (필수)</label>
-        <textarea id="case-text" aria-describedby="case-hint case-error" autocomplete="off"></textarea>
+        <label for="case-text">📝 사건 내용 <span class="opt">(필수)</span></label>
+        <textarea id="case-text" aria-describedby="case-hint case-error" autocomplete="off" placeholder="예) 내일까지인 보고서를 3일째 한 줄도 못 썼다. 파일만 열었다 닫는다."></textarea>
         <p id="case-hint" class="hint">미루고 있는 일을 5자 이상 300자 이하로 적어 주세요. <span id="case-count">0/300</span></p>
         <p id="case-error" class="error-text" role="alert"></p>
       </div>
       <div class="field">
-        <label for="deadline">마감일 (선택)</label>
+        <label for="deadline">📅 마감일 <span class="opt">(선택)</span></label>
         <input id="deadline" type="date" aria-describedby="deadline-error">
         <p id="deadline-error" class="error-text" role="alert"></p>
       </div>
