@@ -1,6 +1,5 @@
 import { useState } from "react";
 import type { CaseInput, TrialRecord, Verdict } from "../types";
-import { makeVerdict } from "../mock/trial";
 import { LoginScreen } from "../features/auth/LoginScreen";
 import { CaseForm } from "../features/trial/CaseForm";
 import { Courtroom } from "../features/trial/Courtroom";
@@ -89,10 +88,11 @@ export function App() {
       {screen === "trial" && trial && (
         <Courtroom
           input={trial.input}
-          onFinish={() => {
-            setTrial({ ...trial, verdict: makeVerdict(trial.input) });
+          onFinish={(verdict, submittedAt) => {
+            setTrial({ ...trial, submittedAt, verdict });
             setScreen("verdict");
           }}
+          onExit={() => { setTrial(null); setScreen("new"); }}
         />
       )}
       {screen === "verdict" && trial?.verdict && (

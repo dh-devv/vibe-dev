@@ -16,6 +16,20 @@ export interface Verdict {
 
 export type Speaker = "judge" | "jury" | "defense" | "prosecution" | "user";
 
+export interface Beat {
+  speaker: Speaker;
+  seat?: number;
+  stage: string;
+  text: string;
+  ai: boolean;
+}
+
+export interface Helpline {
+  name: string;
+  phone: string;
+  hours: string;
+}
+
 export interface CaseInput {
   title: string;
   caseText: string;

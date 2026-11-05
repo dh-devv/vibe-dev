@@ -1,15 +1,8 @@
-import type { Cause, CaseInput, Speaker, Verdict } from "../types";
+import type { Beat, Cause, CaseInput, Verdict } from "../types";
 
 // 서버가 완성되기 전에 화면을 만들기 위한 가짜 데이터다. 배포 전에 이 폴더를 삭제한다.
 // 배심원·사용자 발언·재판 이름은 PRD와 API_SPEC에 아직 없다. 문서 합의 뒤에 서버와 연결한다.
-
-export interface Beat {
-  speaker: Speaker;
-  seat?: number;
-  stage: string;
-  text: string;
-  ai: boolean;
-}
+// 이 파일의 문장은 AI가 만든 것이 아니라 고정된 틀이다.
 
 export const STAGES = ["개정", "변론", "반박", "진술", "협의", "선고"] as const;
 export const USER_SPEECH_MAX = 200;
