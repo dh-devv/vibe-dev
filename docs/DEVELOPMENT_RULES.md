@@ -1,7 +1,7 @@
 # 개발 규칙
 
 팀원과 AI 코딩 에이전트(GitHub Copilot)가 함께 지키는 규칙이다.
-AI에게 작업을 시킬 때는 항상 [AGENTS.md](../AGENTS.md), [PRD.md](../PRD.md), [TRD.md](../TRD.md), [API_SPEC.md](./API_SPEC.md), [DATABASE.md](./DATABASE.md)를 읽게 한다.
+AI에게 작업을 시킬 때는 항상 [AGENTS.md](../AGENTS.md), [PRD.md](./PRD.md), [TRD.md](./TRD.md), [API_SPEC.md](./API_SPEC.md), [DATABASE.md](./DATABASE.md)를 읽게 한다.
 
 ## 1. 개발 환경
 
@@ -59,10 +59,12 @@ vibe-dev/
 ├── infra/                azd 설정과 Bicep
 ├── database/migrations/  Alembic 마이그레이션
 ├── docs/                 명세 문서
-├── AGENTS.md, PRD.md, TRD.md
+├── AGENTS.md
 ├── .env.example, .gitignore
 └── azure.yaml, Dockerfile, requirements.txt (구현 시 생성)
 ```
+
+제품 요구사항과 기술 설계 문서는 `docs/PRD.md`, `docs/TRD.md`에 둔다.
 
 | 담당 | 폴더·파일 |
 | --- | --- |
@@ -81,8 +83,8 @@ vibe-dev/
 | API 경로, 요청·응답, 이벤트, 오류 코드 | [API_SPEC.md](./API_SPEC.md) |
 | 판결문 JSON 형식과 길이 규칙 | [API_SPEC.md](./API_SPEC.md) 5.5절 |
 | 사용자 인증·기록 소유권·DB 스키마 | [DATABASE.md](./DATABASE.md), [API_SPEC.md](./API_SPEC.md) |
-| 기능 범위와 인수 조건 | [PRD.md](../PRD.md) |
-| 에이전트 역할과 금지 사항 | [TRD.md](../TRD.md) 3절 |
+| 기능 범위와 인수 조건 | [PRD.md](./PRD.md) |
+| 에이전트 역할과 금지 사항 | [TRD.md](./TRD.md) 3절 |
 
 **변경 절차**: ① 문서를 고친다 → ② 팀 채팅에 알린다 → ③ 영향받는 담당자가 확인한다 → ④ 코드를 고친다.
 UI와 서버는 이 문서의 규격만 보고 따로 개발한다. 서버가 완성되기 전에는 UI 테스트에서 가짜 SSE 응답을 사용할 수 있다. 가짜 응답은 API_SPEC 5.4절의 이벤트 순서를 따라야 하며, 배포 빌드에 포함하지 않는다.

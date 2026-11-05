@@ -33,10 +33,9 @@ services:
         condition: service_healthy
 
   frontend:
-    image: nginx:1.27-alpine
-    volumes:
-      - ./frontend:/usr/share/nginx/html:ro
-      - ./infra/local/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     ports:
       - "127.0.0.1:5173:80"
     depends_on:

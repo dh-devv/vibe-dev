@@ -41,7 +41,7 @@ azure.yaml, infra/   azd 설정
 Dockerfile
 ```
 
-기존 `backend/`는 초기 계획용 자리표시자다. `frontend/`는 React·TypeScript 앱을 두는 활성 경로이며, `database/`에는 Alembic 마이그레이션을 둔다.
+`frontend/`는 React·TypeScript 앱을 두는 활성 경로이며, `database/`에는 Alembic 마이그레이션을 둔다.
 
 ## 3. 에이전트 하네스
 

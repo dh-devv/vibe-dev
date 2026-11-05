@@ -30,32 +30,35 @@ vibe-dev/
 ├── tests/                   # pytest 테스트
 ├── database/migrations/     # Alembic DB 스키마 마이그레이션
 ├── infra/                   # Azure 배포 인프라
-├── docs/                    # API·저장·개발 문서
-├── PRD.md                   # 제품 요구사항과 인수 조건
-├── TRD.md                   # 기술 구조와 결정
+├── docs/                    # 제품·기술·API·저장·개발 문서
+│   ├── PRD.md               # 제품 요구사항과 인수 조건
+│   └── TRD.md               # 기술 구조와 결정
 └── AGENTS.md                # AI 에이전트 작업 규칙
 ```
 
-`backend/`는 초기 계획에서 남은 폴더이며 현재 구현 위치가 아닙니다. 데이터베이스 마이그레이션은 `database/migrations/`에 둡니다. 실제 구현 경로는 [TRD.md](./TRD.md)를 기준으로 합니다.
+데이터베이스 마이그레이션은 `database/migrations/`에 둡니다. 실제 구현 경로는 [TRD.md](./docs/TRD.md)를 기준으로 합니다.
 
 ## 시작하기
 
-개발 환경과 명령은 [개발 규칙](./docs/DEVELOPMENT_RULES.md)을 참고하세요. Python 의존성 파일과 앱 코드가 준비된 뒤 실행합니다. 실행 전 PostgreSQL과 OIDC 설정을 `.env`에 구성해야 합니다.
+### Docker Compose로 실행하기
+
+Docker Desktop을 실행한 뒤 저장소 루트의 PowerShell에서 아래 명령을 실행합니다.
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
-pip install -r requirements.txt
-uvicorn src.app.main:app --reload --port 8000
+docker compose up --build
 ```
 
-`GET /health`에서 서버 응답을 확인할 수 있습니다. `.env`는 로컬 설정 전용이며 커밋하지 마세요. 로컬 PostgreSQL은 `docker compose up -d postgres`로 실행합니다([데이터 명세](./docs/DATABASE.md)).
+첫 실행은 이미지를 빌드하므로 시간이 걸릴 수 있습니다. 준비가 끝나면 웹 앱은 `http://localhost:5173`, 서버 상태 확인은 `http://localhost:8000/health`에서 할 수 있습니다. 실제 AI 재판을 실행하려면 `.env`에 `COPILOT_GITHUB_TOKEN`을 설정하세요. `.env`는 로컬 전용이며 커밋하지 마세요.
+
+실행 중 로그는 다른 PowerShell 창에서 `docker compose logs -f`로 확인합니다. 종료하려면 실행 창에서 `Ctrl+C`를 누릅니다. 백그라운드로 실행하려면 `docker compose up --build -d`, 종료하려면 `docker compose down`을 사용합니다. `docker compose down -v`는 로컬 DB 데이터를 삭제하므로 주의하세요.
+
+Python 서버를 직접 실행하는 방법은 [개발 규칙](./docs/DEVELOPMENT_RULES.md)을 참고하세요.
 
 ## 문서
 
-- [제품 요구사항 및 인수 조건](./PRD.md)
-- [기술 설계 및 배포](./TRD.md)
+- [제품 요구사항 및 인수 조건](./docs/PRD.md)
+- [기술 설계 및 배포](./docs/TRD.md)
 - [아이디어 배경](./docs/IDEA.md)
 - [프런트엔드 개발 안내](./docs/FRONTEND.md)
 - [문서 색인과 변경 규칙](./docs/README.md)
