@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>미루기 재판소</title>
+<meta name="theme-color" content="#12142b">
+<meta name="description" content="미루는 일을 법정에 세우고, AI 공방 끝에 맞춤 처방을 판결받는 앱">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="미루기 재판소">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
@@ -886,6 +894,10 @@ $("new-btn").addEventListener("click", () => {
   resetToIntake();
 });
 $("clear-btn").addEventListener("click", clearRecords);
+
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
 
 $("deadline").min = utcDate(0);
 $("deadline").max = utcDate(365);
