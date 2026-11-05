@@ -4,8 +4,8 @@ fastapi==0.104.1
 uvicorn[standard]==0.24.0
 
 # GitHub Copilot SDK
-github-copilot-sdk==0.1.0
-agent-framework-github-copilot==0.1.0
+github-copilot-sdk==1.0.28
+agent-framework-github-copilot==2.1.1
 
 # 입력 검증 & 유틸리티
 pydantic==2.5.0

@@ -41,9 +41,12 @@ vibe-dev/
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 pip install -r requirements.txt
 uvicorn src.app.main:app --reload --port 8000
 ```
+
+`GET /health`에서 서버 응답을 확인할 수 있습니다. `.env`는 로컬 설정 전용이며 커밋하지 마세요. 현재 요구사항은 데이터베이스를 사용하지 않습니다.
 
 ## 문서
 
