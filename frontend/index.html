@@ -544,12 +544,23 @@ async function handleHttpError(response) {
     showCrisis(body);
     return;
   }
-  let message = body && typeof body.message === "string" ? body.message : "요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.";
+  const fallbackMessages = {
+    401: "로그인이 필요하거나 로그인 세션이 만료되었습니다. 다시 로그인해 주세요.",
+    403: "요청 권한을 확인할 수 없습니다. 페이지를 새로고침한 뒤 다시 시도해 주세요.",
+    404: "재판 API를 찾지 못했습니다. 서버가 /api/trial 경로를 제공하는지 확인해 주세요.",
+    422: "사건 내용이나 요청 형식이 올바르지 않습니다. 입력 내용을 확인해 주세요.",
+    429: "요청 한도를 초과했습니다. 잠시 후 다시 시도해 주세요."
+  };
+  let message = body && typeof body.message === "string"
+    ? body.message
+    : fallbackMessages[response.status] || `서버가 요청을 처리하지 못했습니다. (HTTP ${response.status})`;
   const wait = response.headers.get("Retry-After");
   if (response.status === 429 && wait && /^\d+$/.test(wait)) {
     message += ` (${wait}초 뒤에 다시 시도할 수 있습니다.)`;
   }
-  const retryable = body && typeof body.retryable === "boolean" ? body.retryable : response.status >= 500;
+  const retryable = body && typeof body.retryable === "boolean"
+    ? body.retryable
+    : response.status === 429 || response.status >= 500;
   showError(message, retryable);
 }
 
@@ -594,6 +605,12 @@ async function startTrial(caseText, deadline) {
       finished = true;
       return;
     }
+    if (!response.headers.get("content-type")?.includes("text/event-stream")) {
+      throw new Error("INVALID_CONTENT_TYPE");
+    }
+    if (!response.body) {
+      throw new Error("MISSING_STREAM");
+    }
     for await (const { name, data } of readEvents(response)) {
       if (name === "stage") {
         if (typeof data.stage === "string" && STAGE_TEXT[data.stage]) {
@@ -617,7 +634,7 @@ async function startTrial(caseText, deadline) {
         }
       } else if (name === "verdict") {
         if (!isVerdict(data) || [0, 1, 2].some((i) => !mine.statements[i])) {
-          throw new Error("invalid verdict");
+          throw new Error("INVALID_VERDICT");
         }
         mine.verdict = data;
         renderVerdict(data);
@@ -630,12 +647,24 @@ async function startTrial(caseText, deadline) {
         finished = true;
       }
     }
-    if (!mine.verdict) throw new Error("incomplete");
-  } catch {
+    if (!mine.verdict) throw new Error("INCOMPLETE_STREAM");
+  } catch (error) {
     if (finished || session !== mine) return;
-    showError(ctrl.signal.aborted
-      ? "재판이 너무 오래 걸려 중단했습니다. 다시 시도해 주세요."
-      : "법정에 문제가 생겼습니다. 잠시 후 다시 시도해 주세요.", true);
+    let message;
+    if (ctrl.signal.aborted) {
+      message = "재판이 너무 오래 걸려 중단했습니다. 다시 시도해 주세요.";
+    } else if (error instanceof TypeError) {
+      message = "서버에 연결할 수 없습니다. API 서버가 실행 중인지와 개발 서버의 API 프록시 설정을 확인해 주세요.";
+    } else if (error.message === "INVALID_CONTENT_TYPE" || error.message === "MISSING_STREAM") {
+      message = "서버가 실시간 재판 응답을 보내지 않았습니다. /api/trial의 SSE 설정을 확인해 주세요.";
+    } else if (error.message === "INVALID_VERDICT") {
+      message = "판결 응답 형식이 올바르지 않습니다. 서버와 화면의 판결 명세가 일치하는지 확인해 주세요.";
+    } else if (error.message === "INCOMPLETE_STREAM") {
+      message = "판결을 받기 전에 연결이 끊겼습니다. 서버 로그와 네트워크 연결을 확인한 뒤 다시 시도해 주세요.";
+    } else {
+      message = "재판 중 오류가 발생했습니다. 서버 로그에서 요청 시각과 오류를 확인해 주세요.";
+    }
+    showError(message, true);
     session = null;
   } finally {
     clearTimeout(timeout);
